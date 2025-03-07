@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>MirrorSharp.Internal.Roslyn413</AssemblyName>
+    <RootNamespace>MirrorSharp.Internal.Roslyn413</RootNamespace>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <InternalsAssemblyNames>Microsoft.CodeAnalysis.Features;Microsoft.CodeAnalysis.Workspaces</InternalsAssemblyNames>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="IgnoresAccessChecksToGenerator" Version="0.8.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.CodeAnalysis" Version="4.13.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Features" Version="4.13.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.13.0" />
+    <!-- Avoids vulnerability in version referenced by Microsoft.CodeAnalysis.Features -->
+    <PackageReference Include="System.Text.Json" Version="9.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Internal.RoslynInternals\Internal.RoslynInternals.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.4">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+</Project>

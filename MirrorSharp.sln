@@ -93,6 +93,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Internal.Roslyn412", "Inter
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests.Roslyn411", "Tests.Roslyn411\Tests.Roslyn411.csproj", "{7E731B53-91A5-4E63-ADBF-29EBC902C903}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Internal.Roslyn413", "Internal.Roslyn413\Internal.Roslyn413.csproj", "{CABD9809-BF2E-4B5B-7736-50989A4ABE04}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -251,6 +253,10 @@ Global
 		{7E731B53-91A5-4E63-ADBF-29EBC902C903}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7E731B53-91A5-4E63-ADBF-29EBC902C903}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7E731B53-91A5-4E63-ADBF-29EBC902C903}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CABD9809-BF2E-4B5B-7736-50989A4ABE04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CABD9809-BF2E-4B5B-7736-50989A4ABE04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CABD9809-BF2E-4B5B-7736-50989A4ABE04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CABD9809-BF2E-4B5B-7736-50989A4ABE04}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -292,6 +298,7 @@ Global
 		{4D749251-F7BF-47AE-B319-7A4A872C71F2} = {4F01ABD9-3F66-4D4B-A8B0-ED15B77099E2}
 		{F6B6A20A-FFF0-4F1C-AE4E-8DF454C73770} = {4F01ABD9-3F66-4D4B-A8B0-ED15B77099E2}
 		{7E731B53-91A5-4E63-ADBF-29EBC902C903} = {269EAC4A-4214-4458-9B65-42E809E168E7}
+		{CABD9809-BF2E-4B5B-7736-50989A4ABE04} = {4F01ABD9-3F66-4D4B-A8B0-ED15B77099E2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {AA05E375-911A-4C8F-A6D6-C0B895E7BDE4}
