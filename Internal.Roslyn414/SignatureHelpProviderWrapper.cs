@@ -17,7 +17,7 @@ internal class SignatureHelpProviderWrapper : ISignatureHelpProviderWrapper {
 
     public async Task<SignatureHelpItemsData?> GetItemsAsync(Document document, int position, SignatureHelpTriggerInfoData triggerInfo, SignatureHelpOptionsData options, CancellationToken cancellationToken) {
         // This is quite complicated to implement correctly and is still shifting around.
-        // For now we will only allow default options. There is no way to check if user
+        // For now, we will only allow default options. There is no way to check if user
         // intended something different, but that can be implemented later.
         var mappedOptions = MemberDisplayOptions.Default;
         var mappedTriggerInfo = new SignatureHelpTriggerInfo(

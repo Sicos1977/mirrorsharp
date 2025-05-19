@@ -1305,7 +1305,10 @@
         }
       },
       "MirrorSharp.AspNetCore": {
-        "type": "Project"
+        "type": "Project",
+        "dependencies": {
+          "MirrorSharp.Common": "[3.0.10, )"
+        }
       },
       "MirrorSharp.AspNetCore.Demo.Library": {
         "type": "Project"
