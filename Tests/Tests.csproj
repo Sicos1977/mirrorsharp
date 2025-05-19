@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1; net471</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <AssemblyName>MirrorSharp.Tests</AssemblyName>
     <RootNamespace>MirrorSharp.Tests</RootNamespace>
     <IsPackable>false</IsPackable>
