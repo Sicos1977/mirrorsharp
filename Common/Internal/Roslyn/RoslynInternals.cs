@@ -19,16 +19,16 @@ namespace MirrorSharp.Internal.Roslyn {
         public RoslynInternals(
             ICodeActionInternals codeAction,
             IWorkspaceAnalyzerOptionsInternals workspaceAnalyzerOptions,
-            ISignatureHelpProviderWrapperResolver singatureHelpProviderResolver
+            ISignatureHelpProviderWrapperResolver signatureHelpProviderResolver
         ) {
             CodeAction = codeAction;
             WorkspaceAnalyzerOptions = workspaceAnalyzerOptions;
-            SingatureHelpProviderResolver = singatureHelpProviderResolver;
+            SignatureHelpProviderResolver = signatureHelpProviderResolver;
         }
 
         public ICodeActionInternals CodeAction { get; }
         public IWorkspaceAnalyzerOptionsInternals WorkspaceAnalyzerOptions { get; }
-        public ISignatureHelpProviderWrapperResolver SingatureHelpProviderResolver { get; }
+        public ISignatureHelpProviderWrapperResolver SignatureHelpProviderResolver { get; }
 
         public static RoslynInternals Get(CompositionHost compositionHost) {
             Argument.NotNull(nameof(compositionHost), compositionHost);

@@ -41,7 +41,7 @@ namespace MirrorSharp.Internal.Roslyn {
             );
             _roslynInternals = RoslynInternals.Get(_compositionHost);
             _defaultSignatureHelpProviders = ImmutableArray.CreateRange(
-                _roslynInternals.SingatureHelpProviderResolver.GetAllSlow(languageName: Name)
+                _roslynInternals.SignatureHelpProviderResolver.GetAllSlow(languageName: Name)
             );
         }
 
