@@ -1,3 +1,4 @@
-namespace System.Diagnostics.CodeAnalysis {
-    internal class MaybeNullAttribute : Attribute {}
+namespace System.Diagnostics.CodeAnalysis;
+
+internal class MaybeNullAttribute : Attribute {
 }

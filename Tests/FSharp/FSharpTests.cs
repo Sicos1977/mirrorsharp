@@ -34,13 +34,15 @@ public class FSharpTests {
         var driver = MirrorSharpTestDriver.New(Options, FSharpLanguage.Name);
         await driver.SendReplaceTextAsync("xyz");
         var result = await driver.SendSlowUpdateAsync();
-        
+
         Assert.Equal(
-            new[] { new {
-                Severity = "error",
-                Message = "The value or constructor 'xyz' is not defined.",
-                Span = new { Start = (int?)0, Length = (int?)3 }
-            } },
+            new[] {
+                new {
+                    Severity = "error",
+                    Message = "The value or constructor 'xyz' is not defined.",
+                    Span = new { Start = (int?)0, Length = (int?)3 }
+                }
+            },
             result.Diagnostics.Select(d => new {
                 d.Severity,
                 d.Message,
@@ -70,7 +72,7 @@ public class FSharpTests {
                 new { DisplayText = "GetHashCode", Kind = "method" },
                 new { DisplayText = "GetType", Kind = "method" },
                 new { DisplayText = "Method", Kind = "method" },
-                new { DisplayText = "ToString", Kind = "method" },
+                new { DisplayText = "ToString", Kind = "method" }
             },
             // https://github.com/xunit/assert.xunit/pull/36#issuecomment-578990557
             result!.Completions.Select(c => new { c.DisplayText, Kind = c.Kinds.SingleOrDefault() })

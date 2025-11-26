@@ -1,13 +1,15 @@
-namespace MirrorSharp.Testing.Internal.Results {
-    internal class CompletionsItemInfoPart {
-        public CompletionsItemInfoPart(string kind, string text) {
-            Kind = kind;
-            Text = text;
-        }
+namespace MirrorSharp.Testing.Internal.Results;
 
-        public string Kind { get; }
-        public string Text { get; }
+internal class CompletionsItemInfoPart {
+    public string Kind { get; }
+    public string Text { get; }
 
-        public override string ToString() => Text;
+    public CompletionsItemInfoPart(string kind, string text) {
+        Kind = kind;
+        Text = text;
+    }
+
+    public override string ToString() {
+        return Text;
     }
 }

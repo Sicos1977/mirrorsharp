@@ -2,24 +2,25 @@ using System.Collections.Immutable;
 using System.Composition;
 using Microsoft.CodeAnalysis.CodeActions;
 using MirrorSharp.Internal.Roslyn.Internals;
+using CodeActionPriority = MirrorSharp.Internal.Roslyn.Internals.CodeActionPriority;
 
-namespace MirrorSharp.Internal.Roslyn42 {
-    [Shared]
-    [Export(typeof(ICodeActionInternals))]
-    internal class CodeActionInternals : ICodeActionInternals {
-        public bool IsInlinable(CodeAction action) {
-            Argument.NotNull(nameof(action), action);
-            return action.IsInlinable;
-        }
+namespace MirrorSharp.Internal.Roslyn42;
 
-        public Roslyn.Internals.CodeActionPriority GetPriority(CodeAction action) {
-            Argument.NotNull(nameof(action), action);
-            return (Roslyn.Internals.CodeActionPriority)(int)action.Priority;
-        }
+[Shared]
+[Export(typeof(ICodeActionInternals))]
+internal class CodeActionInternals : ICodeActionInternals {
+    public bool IsInlinable(CodeAction action) {
+        Argument.NotNull(nameof(action), action);
+        return action.IsInlinable;
+    }
 
-        public ImmutableArray<CodeAction> GetNestedCodeActions(CodeAction action) {
-            Argument.NotNull(nameof(action), action);
-            return action.NestedCodeActions;
-        }
+    public CodeActionPriority GetPriority(CodeAction action) {
+        Argument.NotNull(nameof(action), action);
+        return (CodeActionPriority)(int)action.Priority;
+    }
+
+    public ImmutableArray<CodeAction> GetNestedCodeActions(CodeAction action) {
+        Argument.NotNull(nameof(action), action);
+        return action.NestedCodeActions;
     }
 }

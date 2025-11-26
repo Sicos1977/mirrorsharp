@@ -15,133 +15,131 @@ using Newtonsoft.Json;
 // ReSharper disable HeapView.DelegateAllocation
 // ReSharper disable HeapView.ObjectAllocation
 
-namespace MirrorSharp.Testing {
-    public class MirrorSharpTestDriver {
-        private static readonly MirrorSharpOptions DefaultOptions = new();
-        private static readonly MirrorSharpServices DefaultServices = new();
-        private static readonly ConcurrentDictionary<MirrorSharpOptions, LanguageManager> LanguageManagerCache = new();
+namespace MirrorSharp.Testing;
 
-        private readonly TestMiddleware _middleware;
-        private readonly MirrorSharpServices _services;
+public class MirrorSharpTestDriver {
+    private static readonly MirrorSharpOptions DefaultOptions = new();
+    private static readonly MirrorSharpServices DefaultServices = new();
+    private static readonly ConcurrentDictionary<MirrorSharpOptions, LanguageManager> LanguageManagerCache = new();
 
-        private MirrorSharpTestDriver(MirrorSharpOptions? options = null, MirrorSharpServices? services = null, string languageName = LanguageNames.CSharp) {
-            options ??= DefaultOptions;
-            services ??= DefaultServices;
+    private readonly TestMiddleware _middleware;
+    private readonly MirrorSharpServices _services;
 
-            _services = services;
-            var language = GetLanguageManager(options).GetLanguage(languageName);
-            _middleware = new TestMiddleware(options, services);
-            Session = new WorkSession(language, options, services.ToImmutable());
-        }
-        
-        internal WorkSession Session { get; }
+    internal WorkSession Session { get; }
 
-        // Obsolete: will be removed in the next major version. However no changes are required on caller side.
-        public static MirrorSharpTestDriver New() {
-            return new MirrorSharpTestDriver(options: null, services: null, languageName: LanguageNames.CSharp);
-        }
+    private MirrorSharpTestDriver(MirrorSharpOptions? options = null, MirrorSharpServices? services = null, string languageName = LanguageNames.CSharp) {
+        options ??= DefaultOptions;
+        services ??= DefaultServices;
 
-        // Obsolete: will be removed in the next major version. However no changes are required on caller side.
-        public static MirrorSharpTestDriver New(MirrorSharpOptions? options = null, string languageName = LanguageNames.CSharp) {
-            return new MirrorSharpTestDriver(options, services: null, languageName);
-        }
+        _services = services;
+        var language = GetLanguageManager(options).GetLanguage(languageName);
+        _middleware = new TestMiddleware(options, services);
+        Session = new WorkSession(language, options, services.ToImmutable());
+    }
 
-        public static MirrorSharpTestDriver New(MirrorSharpServices services) {
-            return new MirrorSharpTestDriver(options: null, services: services, languageName: LanguageNames.CSharp);
-        }
+    // Obsolete: will be removed in the next major version. However no changes are required on caller side.
+    public static MirrorSharpTestDriver New() {
+        return new MirrorSharpTestDriver(null, null, LanguageNames.CSharp);
+    }
 
-        public static MirrorSharpTestDriver New(MirrorSharpOptions options) {
-            return new MirrorSharpTestDriver(options: options, services: null, languageName: LanguageNames.CSharp);
-        }
+    // Obsolete: will be removed in the next major version. However no changes are required on caller side.
+    public static MirrorSharpTestDriver New(MirrorSharpOptions? options = null, string languageName = LanguageNames.CSharp) {
+        return new MirrorSharpTestDriver(options, null, languageName);
+    }
 
-        public static MirrorSharpTestDriver New(MirrorSharpOptions? options = null, MirrorSharpServices? services = null, string languageName = LanguageNames.CSharp) {
-            return new MirrorSharpTestDriver(options, services, languageName);
-        }
+    public static MirrorSharpTestDriver New(MirrorSharpServices services) {
+        return new MirrorSharpTestDriver(null, services, LanguageNames.CSharp);
+    }
 
-        public MirrorSharpTestDriver SetText(string text) {
-            Session.ReplaceText(text);
-            return this;
-        }
+    public static MirrorSharpTestDriver New(MirrorSharpOptions options) {
+        return new MirrorSharpTestDriver(options, null, LanguageNames.CSharp);
+    }
 
-        public MirrorSharpTestDriver SetTextWithCursor(string textWithCursor) {
-            var parsed = TextWithCursor.Parse(textWithCursor);
+    public static MirrorSharpTestDriver New(MirrorSharpOptions? options = null, MirrorSharpServices? services = null, string languageName = LanguageNames.CSharp) {
+        return new MirrorSharpTestDriver(options, services, languageName);
+    }
 
-            Session.ReplaceText(parsed.Text);
-            Session.CursorPosition = parsed.CursorPosition;
-            return this;
-        }
+    public MirrorSharpTestDriver SetText(string text) {
+        Session.ReplaceText(text);
+        return this;
+    }
 
-        public async Task SendTypeCharsAsync(string value) {
-            foreach (var @char in value) {
-                await SendAsync(CommandIds.TypeChar, @char);
-            }
-        }
+    public MirrorSharpTestDriver SetTextWithCursor(string textWithCursor) {
+        var parsed = TextWithCursor.Parse(textWithCursor);
 
-        public Task<SlowUpdateResult<object>> SendSlowUpdateAsync() => SendSlowUpdateAsync<object>();
+        Session.ReplaceText(parsed.Text);
+        Session.CursorPosition = parsed.CursorPosition;
+        return this;
+    }
 
-        public Task<SlowUpdateResult<TExtensionResult>> SendSlowUpdateAsync<TExtensionResult>() {
-            return SendWithRequiredResultAsync<SlowUpdateResult<TExtensionResult>>(CommandIds.SlowUpdate);
-        }
+    public async Task SendTypeCharsAsync(string value) {
+        foreach (var @char in value) await SendAsync(CommandIds.TypeChar, @char);
+    }
 
-        public Task<OptionsEchoResult> SendSetOptionAsync(string name, string value) {
-            return SendWithRequiredResultAsync<OptionsEchoResult>(CommandIds.SetOptions, $"{name}={value}");
-        }
+    public Task<SlowUpdateResult<object>> SendSlowUpdateAsync() {
+        return SendSlowUpdateAsync<object>();
+    }
 
-        public Task<OptionsEchoResult> SendSetOptionsAsync(IDictionary<string, string> options) {
-            return SendWithRequiredResultAsync<OptionsEchoResult>(CommandIds.SetOptions, string.Join(",", options.Select(o => $"{o.Key}={o.Value}")));
-        }
+    public Task<SlowUpdateResult<TExtensionResult>> SendSlowUpdateAsync<TExtensionResult>() {
+        return SendWithRequiredResultAsync<SlowUpdateResult<TExtensionResult>>(CommandIds.SlowUpdate);
+    }
 
-        public Task<InfoTipResult?> SendRequestInfoTipAsync(int position) {
-            return SendWithOptionalResultAsync<InfoTipResult>(CommandIds.RequestInfoTip, position);
-        }
+    public Task<OptionsEchoResult> SendSetOptionAsync(string name, string value) {
+        return SendWithRequiredResultAsync<OptionsEchoResult>(CommandIds.SetOptions, $"{name}={value}");
+    }
 
-        internal Task SendReplaceTextAsync(string newText, int start = 0, int length = 0, int newCursorPosition = 0, string reason = "") {
-            // ReSharper disable HeapView.BoxingAllocation
-            return SendAsync(CommandIds.ReplaceText, $"{start}:{length}:{newCursorPosition}:{reason}:{newText}");
-            // ReSharper restore HeapView.BoxingAllocation
-        }
+    public Task<OptionsEchoResult> SendSetOptionsAsync(IDictionary<string, string> options) {
+        return SendWithRequiredResultAsync<OptionsEchoResult>(CommandIds.SetOptions, string.Join(",", options.Select(o => $"{o.Key}={o.Value}")));
+    }
 
-        internal Task<CompletionsResult?> SendTypeCharAsync(char @char) {
-            return SendWithOptionalResultAsync<CompletionsResult>(CommandIds.TypeChar, @char);
-        }
+    public Task<InfoTipResult?> SendRequestInfoTipAsync(int position) {
+        return SendWithOptionalResultAsync<InfoTipResult>(CommandIds.RequestInfoTip, position);
+    }
 
-        internal Task SendBackspaceAsync() {
-            return SendReplaceTextAsync("", Session.CursorPosition - 1, 1, Session.CursorPosition - 1);
-        }
+    internal Task SendReplaceTextAsync(string newText, int start = 0, int length = 0, int newCursorPosition = 0, string reason = "") {
+        // ReSharper disable HeapView.BoxingAllocation
+        return SendAsync(CommandIds.ReplaceText, $"{start}:{length}:{newCursorPosition}:{reason}:{newText}");
+        // ReSharper restore HeapView.BoxingAllocation
+    }
 
-        internal async Task<TResult> SendWithRequiredResultAsync<TResult>(char commandId, HandlerTestArgument? argument = null)
-            where TResult: class
-        {
-            return await SendWithOptionalResultAsync<TResult>(commandId, argument)
-                ?? throw new Exception($"Expected {typeof(TResult).Name} for command {commandId} was not received.");
-        }
+    internal Task<CompletionsResult?> SendTypeCharAsync(char @char) {
+        return SendWithOptionalResultAsync<CompletionsResult>(CommandIds.TypeChar, @char);
+    }
 
-        internal async Task<TResult?> SendWithOptionalResultAsync<TResult>(char commandId, HandlerTestArgument? argument = null)
-            where TResult : class
-        {
-            var sender = new StubCommandResultSender(Session, _services.ConnectionSendViewer);
-            await _middleware.GetHandler(commandId).ExecuteAsync(argument?.ToAsyncData(commandId) ?? AsyncData.Empty, Session, sender, CancellationToken.None);
-            return sender.LastMessageJson != null
-                ? JsonConvert.DeserializeObject<TResult>(sender.LastMessageJson)
-                : null;
-        }
+    internal Task SendBackspaceAsync() {
+        return SendReplaceTextAsync("", Session.CursorPosition - 1, 1, Session.CursorPosition - 1);
+    }
 
-        internal Task SendAsync(char commandId, HandlerTestArgument? argument = default(HandlerTestArgument)) {
-            return _middleware.GetHandler(commandId).ExecuteAsync(
-                argument?.ToAsyncData(commandId) ?? AsyncData.Empty,
-                Session,
-                new StubCommandResultSender(Session, _services.ConnectionSendViewer),
-                CancellationToken.None
-            );
-        }
+    internal async Task<TResult> SendWithRequiredResultAsync<TResult>(char commandId, HandlerTestArgument? argument = null)
+        where TResult : class {
+        return await SendWithOptionalResultAsync<TResult>(commandId, argument)
+               ?? throw new Exception($"Expected {typeof(TResult).Name} for command {commandId} was not received.");
+    }
 
-        private static LanguageManager GetLanguageManager(MirrorSharpOptions options) {
-            return LanguageManagerCache.GetOrAdd(options, _ => new LanguageManager(options));
-        }
+    internal async Task<TResult?> SendWithOptionalResultAsync<TResult>(char commandId, HandlerTestArgument? argument = null)
+        where TResult : class {
+        var sender = new StubCommandResultSender(Session, _services.ConnectionSendViewer);
+        await _middleware.GetHandler(commandId).ExecuteAsync(argument?.ToAsyncData(commandId) ?? AsyncData.Empty, Session, sender, CancellationToken.None);
+        return sender.LastMessageJson != null
+            ? JsonConvert.DeserializeObject<TResult>(sender.LastMessageJson)
+            : null;
+    }
 
-        private class TestMiddleware : MiddlewareBase {
-            public TestMiddleware(MirrorSharpOptions options, MirrorSharpServices services) : base(GetLanguageManager(options), options, services.ToImmutable()) {
-            }
+    internal Task SendAsync(char commandId, HandlerTestArgument? argument = default) {
+        return _middleware.GetHandler(commandId).ExecuteAsync(
+            argument?.ToAsyncData(commandId) ?? AsyncData.Empty,
+            Session,
+            new StubCommandResultSender(Session, _services.ConnectionSendViewer),
+            CancellationToken.None
+        );
+    }
+
+    private static LanguageManager GetLanguageManager(MirrorSharpOptions options) {
+        return LanguageManagerCache.GetOrAdd(options, _ => new LanguageManager(options));
+    }
+
+    private class TestMiddleware : MiddlewareBase {
+        public TestMiddleware(MirrorSharpOptions options, MirrorSharpServices services) : base(GetLanguageManager(options), options, services.ToImmutable()) {
         }
     }
 }

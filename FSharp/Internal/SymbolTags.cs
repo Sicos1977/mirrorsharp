@@ -1,28 +1,30 @@
 using System.Collections.Immutable;
 using FSharp.Compiler.Symbols;
 
-namespace MirrorSharp.FSharp.Internal {
-    internal static class SymbolTags {
-        private static ImmutableArray<string> Namespace { get; } = ImmutableArray.Create("Namespace");
+namespace MirrorSharp.FSharp.Internal;
 
-        private static ImmutableArray<string> Delegate { get; } = ImmutableArray.Create("Delegate");
-        private static ImmutableArray<string> Enum { get; } = ImmutableArray.Create("Enum");
-        private static ImmutableArray<string> Union { get; } = ImmutableArray.Create("Union");
-        private static ImmutableArray<string> Structure { get; } = ImmutableArray.Create("Structure");
-        private static ImmutableArray<string> Class { get; } = ImmutableArray.Create("Class");
-        private static ImmutableArray<string> Interface { get; } = ImmutableArray.Create("Interface");
-        private static ImmutableArray<string> TypeParameter { get; } = ImmutableArray.Create("TypeParameter");
-        private static ImmutableArray<string> Module { get; } = ImmutableArray.Create("Module");
+internal static class SymbolTags {
+    private static ImmutableArray<string> Namespace { get; } = ImmutableArray.Create("Namespace");
 
-        private static ImmutableArray<string> Property { get; } = ImmutableArray.Create("Property");
-        private static ImmutableArray<string> Method { get; } = ImmutableArray.Create("Method");
-        private static ImmutableArray<string> Field { get; } = ImmutableArray.Create("Field");
+    private static ImmutableArray<string> Delegate { get; } = ImmutableArray.Create("Delegate");
+    private static ImmutableArray<string> Enum { get; } = ImmutableArray.Create("Enum");
+    private static ImmutableArray<string> Union { get; } = ImmutableArray.Create("Union");
+    private static ImmutableArray<string> Structure { get; } = ImmutableArray.Create("Structure");
+    private static ImmutableArray<string> Class { get; } = ImmutableArray.Create("Class");
+    private static ImmutableArray<string> Interface { get; } = ImmutableArray.Create("Interface");
+    private static ImmutableArray<string> TypeParameter { get; } = ImmutableArray.Create("TypeParameter");
+    private static ImmutableArray<string> Module { get; } = ImmutableArray.Create("Module");
 
-        private static ImmutableArray<string> Local { get; } = ImmutableArray.Create("Local");
+    private static ImmutableArray<string> Property { get; } = ImmutableArray.Create("Property");
+    private static ImmutableArray<string> Method { get; } = ImmutableArray.Create("Method");
+    private static ImmutableArray<string> Field { get; } = ImmutableArray.Create("Field");
 
-        private static ImmutableArray<string> None { get; } = ImmutableArray<string>.Empty;
+    private static ImmutableArray<string> Local { get; } = ImmutableArray.Create("Local");
 
-        public static ImmutableArray<string> From(FSharpSymbol symbol) => symbol switch {
+    private static ImmutableArray<string> None { get; } = ImmutableArray<string>.Empty;
+
+    public static ImmutableArray<string> From(FSharpSymbol symbol) {
+        return symbol switch {
             FSharpField _ => Field,
             FSharpEntity e => FromEntity(e),
             FSharpMemberOrFunctionOrValue m => m switch {
@@ -34,8 +36,10 @@ namespace MirrorSharp.FSharp.Internal {
             },
             _ => None
         };
+    }
 
-        private static ImmutableArray<string> FromEntity(FSharpEntity entity) => entity switch {
+    private static ImmutableArray<string> FromEntity(FSharpEntity entity) {
+        return entity switch {
             { IsNamespace: true } => Namespace,
             { IsClass: true } => Class,
             { IsInterface: true } => Interface,
@@ -47,8 +51,10 @@ namespace MirrorSharp.FSharp.Internal {
             { IsFSharpAbbreviation: true } => FromType(entity.AbbreviatedType),
             _ => None
         };
+    }
 
-        private static ImmutableArray<string> FromType(FSharpType type) => type switch {
+    private static ImmutableArray<string> FromType(FSharpType type) {
+        return type switch {
             { IsFunctionType: true } => Delegate,
             { IsAnonRecordType: true } => Class,
             { IsTupleType: true } => Class,

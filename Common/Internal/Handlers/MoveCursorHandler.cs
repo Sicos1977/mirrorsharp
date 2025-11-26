@@ -3,19 +3,20 @@ using System.Threading.Tasks;
 using MirrorSharp.Internal.Handlers.Shared;
 using MirrorSharp.Internal.Results;
 
-namespace MirrorSharp.Internal.Handlers {
-    internal class MoveCursorHandler : ICommandHandler {
-        public char CommandId => CommandIds.MoveCursor;
-        private readonly ISignatureHelpSupport _signatureHelp;
+namespace MirrorSharp.Internal.Handlers;
 
-        public MoveCursorHandler(ISignatureHelpSupport signatureHelp) {
-            _signatureHelp = signatureHelp;
-        }
+internal class MoveCursorHandler : ICommandHandler {
+    private readonly ISignatureHelpSupport _signatureHelp;
 
-        public Task ExecuteAsync(AsyncData data, WorkSession session, ICommandResultSender sender, CancellationToken cancellationToken) {
-            var cursorPosition = FastConvert.Utf8BytesToInt32(data.GetFirst().Span);
-            session.CursorPosition = cursorPosition;
-            return _signatureHelp.ApplyCursorPositionChangeAsync(session, sender, cancellationToken);
-        }
+    public MoveCursorHandler(ISignatureHelpSupport signatureHelp) {
+        _signatureHelp = signatureHelp;
+    }
+
+    public char CommandId => CommandIds.MoveCursor;
+
+    public Task ExecuteAsync(AsyncData data, WorkSession session, ICommandResultSender sender, CancellationToken cancellationToken) {
+        var cursorPosition = FastConvert.Utf8BytesToInt32(data.GetFirst().Span);
+        session.CursorPosition = cursorPosition;
+        return _signatureHelp.ApplyCursorPositionChangeAsync(session, sender, cancellationToken);
     }
 }

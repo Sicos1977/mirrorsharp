@@ -1,7 +1,5 @@
-using MirrorSharp.Advanced;
+namespace MirrorSharp.Internal;
 
-namespace MirrorSharp.Internal {
-    internal interface IConnectionOptions {
-        bool IncludeExceptionDetails { get; set; }
-    }
+internal interface IConnectionOptions {
+    bool IncludeExceptionDetails { get; set; }
 }

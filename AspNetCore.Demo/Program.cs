@@ -1,13 +1,14 @@
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 
-namespace MirrorSharp.AspNetCore.Demo {
-    public static class Program {
-        public static void Main(string[] args) {
-            CreateWebHostBuilder(args).Build().Run();
-        }
+namespace MirrorSharp.AspNetCore.Demo;
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost.CreateDefaultBuilder(args).UseStartup<Startup>();
+public static class Program {
+    public static void Main(string[] args) {
+        CreateWebHostBuilder(args).Build().Run();
+    }
+
+    public static IWebHostBuilder CreateWebHostBuilder(string[] args) {
+        return WebHost.CreateDefaultBuilder(args).UseStartup<Startup>();
     }
 }

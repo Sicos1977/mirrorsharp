@@ -37,25 +37,30 @@ internal class SignatureHelpProviderWrapper : ISignatureHelpProviderWrapper {
         return new SignatureHelpItemsData(
             items.Items.Select(i => new SignatureHelpItemData(
                 i.DocumentationFactory,
-                prefixDisplayParts: i.PrefixDisplayParts,
-                separatorDisplayParts: i.SeparatorDisplayParts,
-                suffixDisplayParts: i.SuffixDisplayParts,
-                parameters: i.Parameters.Select(p => new SignatureHelpParameterData(
+                i.PrefixDisplayParts,
+                i.SeparatorDisplayParts,
+                i.SuffixDisplayParts,
+                i.Parameters.Select(p => new SignatureHelpParameterData(
                     p.Name,
                     p.DocumentationFactory,
-                    displayParts: p.DisplayParts,
-                    prefixDisplayParts: p.PrefixDisplayParts,
-                    suffixDisplayParts: p.SuffixDisplayParts
+                    p.DisplayParts,
+                    p.PrefixDisplayParts,
+                    p.SuffixDisplayParts
                 )),
                 i.Parameters.Length
             )),
-            applicableSpan: items.ApplicableSpan,
-            argumentIndex: items.SemanticParameterIndex,
-            argumentCount: items.SyntacticArgumentCount,
-            selectedItemIndex: items.SelectedItemIndex
+            items.ApplicableSpan,
+            items.SemanticParameterIndex,
+            items.SyntacticArgumentCount,
+            items.SelectedItemIndex
         );
     }
 
-    public bool IsRetriggerCharacter(char ch) => _provider.IsRetriggerCharacter(ch);
-    public bool IsTriggerCharacter(char ch) => _provider.IsTriggerCharacter(ch);
+    public bool IsRetriggerCharacter(char ch) {
+        return _provider.IsRetriggerCharacter(ch);
+    }
+
+    public bool IsTriggerCharacter(char ch) {
+        return _provider.IsTriggerCharacter(ch);
+    }
 }

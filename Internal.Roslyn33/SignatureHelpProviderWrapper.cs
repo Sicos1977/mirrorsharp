@@ -6,52 +6,57 @@ using Microsoft.CodeAnalysis.SignatureHelp;
 using MirrorSharp.Internal.Roslyn.Internals;
 using SignatureHelpTriggerReason = Microsoft.CodeAnalysis.SignatureHelp.SignatureHelpTriggerReason;
 
-namespace MirrorSharp.Internal.Roslyn33 {
-    internal class SignatureHelpProviderWrapper : ISignatureHelpProviderWrapper {
-        private readonly ISignatureHelpProvider _provider;
+namespace MirrorSharp.Internal.Roslyn33;
 
-        public SignatureHelpProviderWrapper(ISignatureHelpProvider provider) {
-            _provider = provider;
-        }
+internal class SignatureHelpProviderWrapper : ISignatureHelpProviderWrapper {
+    private readonly ISignatureHelpProvider _provider;
 
-        public async Task<SignatureHelpItemsData?> GetItemsAsync(Document document, int position, SignatureHelpTriggerInfoData triggerInfo, SignatureHelpOptionsData options, CancellationToken cancellationToken) {
-            var mappedTriggerInfo = new SignatureHelpTriggerInfo(
-                (SignatureHelpTriggerReason)(int)triggerInfo.TriggerReason,
-                triggerInfo.TriggerCharacter
-            );
+    public SignatureHelpProviderWrapper(ISignatureHelpProvider provider) {
+        _provider = provider;
+    }
 
-            var items = await _provider.GetItemsAsync(
-                document, position,
-                mappedTriggerInfo,
-                cancellationToken
-            ).ConfigureAwait(false);
+    public async Task<SignatureHelpItemsData?> GetItemsAsync(Document document, int position, SignatureHelpTriggerInfoData triggerInfo, SignatureHelpOptionsData options, CancellationToken cancellationToken) {
+        var mappedTriggerInfo = new SignatureHelpTriggerInfo(
+            (SignatureHelpTriggerReason)(int)triggerInfo.TriggerReason,
+            triggerInfo.TriggerCharacter
+        );
 
-            if (items == null)
-                return null;
+        var items = await _provider.GetItemsAsync(
+            document, position,
+            mappedTriggerInfo,
+            cancellationToken
+        ).ConfigureAwait(false);
 
-            return new SignatureHelpItemsData(
-                items.Items.Select(i => new SignatureHelpItemData(
-                    i.DocumentationFactory,
-                    prefixDisplayParts: i.PrefixDisplayParts,
-                    separatorDisplayParts: i.SeparatorDisplayParts,
-                    suffixDisplayParts: i.SuffixDisplayParts,
-                    parameters: i.Parameters.Select(p => new SignatureHelpParameterData(
-                        p.Name,
-                        p.DocumentationFactory,
-                        displayParts: p.DisplayParts,
-                        prefixDisplayParts: p.PrefixDisplayParts,
-                        suffixDisplayParts: p.SuffixDisplayParts
-                    )),
-                    i.Parameters.Length
+        if (items == null)
+            return null;
+
+        return new SignatureHelpItemsData(
+            items.Items.Select(i => new SignatureHelpItemData(
+                i.DocumentationFactory,
+                i.PrefixDisplayParts,
+                i.SeparatorDisplayParts,
+                i.SuffixDisplayParts,
+                i.Parameters.Select(p => new SignatureHelpParameterData(
+                    p.Name,
+                    p.DocumentationFactory,
+                    p.DisplayParts,
+                    p.PrefixDisplayParts,
+                    p.SuffixDisplayParts
                 )),
-                applicableSpan: items.ApplicableSpan,
-                argumentIndex: items.ArgumentIndex,
-                argumentCount: items.ArgumentCount,
-                selectedItemIndex: items.SelectedItemIndex
-            );
-        }
+                i.Parameters.Length
+            )),
+            items.ApplicableSpan,
+            items.ArgumentIndex,
+            items.ArgumentCount,
+            items.SelectedItemIndex
+        );
+    }
 
-        public bool IsRetriggerCharacter(char ch) => _provider.IsRetriggerCharacter(ch);
-        public bool IsTriggerCharacter(char ch) => _provider.IsTriggerCharacter(ch);
+    public bool IsRetriggerCharacter(char ch) {
+        return _provider.IsRetriggerCharacter(ch);
+    }
+
+    public bool IsTriggerCharacter(char ch) {
+        return _provider.IsTriggerCharacter(ch);
     }
 }

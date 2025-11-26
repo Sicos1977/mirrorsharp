@@ -1,44 +1,43 @@
 using System;
 using System.Buffers;
 
-namespace MirrorSharp.Internal {
-    internal struct PooledGrowableArray<T> : IDisposable {
-        private readonly ArrayPool<T> _pool;
-        private T[] _array;
+namespace MirrorSharp.Internal;
 
-        public PooledGrowableArray(int initialLength, ArrayPool<T> pool) {
-            _pool = pool;
-            _array = pool.Rent(initialLength);
+internal struct PooledGrowableArray<T> : IDisposable {
+    private readonly ArrayPool<T> _pool;
+
+    public PooledGrowableArray(int initialLength, ArrayPool<T> pool) {
+        _pool = pool;
+        Array = pool.Rent(initialLength);
+    }
+
+    public T[] Array { get; private set; }
+
+    public void Grow(int newLength) {
+        if (newLength <= Array.Length)
+            return;
+
+        var actualNewLength = Array.Length * (int)Math.Pow(2, Math.Log(Math.Ceiling((double)newLength / Array.Length), 2));
+        var newArray = (T[]?)null;
+        var oldArray = (T[]?)null;
+        try {
+            newArray = _pool.Rent(actualNewLength);
+            System.Array.Copy(Array, 0, newArray, 0, Array.Length);
+            oldArray = Array;
+            Array = newArray;
         }
-
-        public T[] Array => _array;
-
-        public void Grow(int newLength) {
-            if (newLength <= _array.Length)
-                return;
-
-            var actualNewLength = _array.Length * (int)Math.Pow(2, Math.Log(Math.Ceiling((double)newLength / _array.Length), 2));
-            var newArray = (T[]?)null;
-            var oldArray = (T[]?)null;
-            try {
-                newArray = _pool.Rent(actualNewLength);
-                System.Array.Copy(_array, 0, newArray, 0, _array.Length);
-                oldArray = _array;
-                _array = newArray;
-            }
-            catch (Exception) {
-                if (_array != newArray && newArray != null)
-                    _pool.Return(newArray);
-                throw;
-            }
-            finally {
-                if (_array != oldArray && oldArray != null)
-                    _pool.Return(oldArray);
-            }
+        catch (Exception) {
+            if (Array != newArray && newArray != null)
+                _pool.Return(newArray);
+            throw;
         }
-
-        public void Dispose() {
-            _pool.Return(_array);
+        finally {
+            if (Array != oldArray && oldArray != null)
+                _pool.Return(oldArray);
         }
+    }
+
+    public void Dispose() {
+        _pool.Return(Array);
     }
 }

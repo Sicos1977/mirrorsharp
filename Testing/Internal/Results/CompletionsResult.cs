@@ -4,9 +4,9 @@ using System.Collections.Generic;
 // ReSharper disable CollectionNeverUpdated.Global
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 
-namespace MirrorSharp.Testing.Internal.Results {
-    internal class CompletionsResult {
-        public CompletionsItem? Suggestion { get; set; }
-        public IList<CompletionsItem> Completions { get; } = new List<CompletionsItem>();
-    }
+namespace MirrorSharp.Testing.Internal.Results;
+
+internal class CompletionsResult {
+    public CompletionsItem? Suggestion { get; set; }
+    public IList<CompletionsItem> Completions { get; } = new List<CompletionsItem>();
 }

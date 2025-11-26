@@ -64,12 +64,6 @@
           "System.Threading.Tasks.Extensions": "4.5.4"
         }
       },
-      "Microsoft.CodeAnalysis.PublicApiAnalyzers": {
-        "type": "Direct",
-        "requested": "[3.3.4, )",
-        "resolved": "3.3.4",
-        "contentHash": "kNLTfXtXUWDHVt5iaPkkiPuyHYlMgLI6SOFT4w88bfeI2vqSeGgHunFkdvlaCM8RDfcY0t2+jnesQtidRJJ/DA=="
-      },
       "Microsoft.CodeAnalysis.Workspaces.Common": {
         "type": "Direct",
         "requested": "[4.12.0, )",

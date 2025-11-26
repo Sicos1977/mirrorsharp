@@ -1,14 +1,16 @@
 using System.Collections.Generic;
 
-namespace MirrorSharp.Testing.Results {
-    public class InfoTipSection {
-        public InfoTipSection(string kind) {
-            Kind = kind;
-        }
+namespace MirrorSharp.Testing.Results;
 
-        public string Kind { get; }
-        public IList<InfoTipSectionPart> Parts { get; } = new List<InfoTipSectionPart>();
+public class InfoTipSection {
+    public string Kind { get; }
+    public IList<InfoTipSectionPart> Parts { get; } = new List<InfoTipSectionPart>();
 
-        public override string ToString() => string.Join("", Parts);
+    public InfoTipSection(string kind) {
+        Kind = kind;
+    }
+
+    public override string ToString() {
+        return string.Join("", Parts);
     }
 }

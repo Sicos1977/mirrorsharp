@@ -4,8 +4,8 @@ using System.Collections.Generic;
 // ReSharper disable CollectionNeverUpdated.Global
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 
-namespace MirrorSharp.Testing.Results {
-    public class OptionsEchoResult {
-        public IDictionary<string, string> Options { get; } = new Dictionary<string, string>();
-    }
+namespace MirrorSharp.Testing.Results;
+
+public class OptionsEchoResult {
+    public IDictionary<string, string> Options { get; } = new Dictionary<string, string>();
 }

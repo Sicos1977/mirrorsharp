@@ -2,12 +2,6 @@
   "version": 1,
   "dependencies": {
     ".NETStandard,Version=v2.0": {
-      "Microsoft.CodeAnalysis.PublicApiAnalyzers": {
-        "type": "Direct",
-        "requested": "[3.3.0, )",
-        "resolved": "3.3.0",
-        "contentHash": "upaG6u/PxjkOj39Kk0DLmmA75acYChmv6/HnOUxvSgGWul53uPcVaPxBWCzkHDfIljyiq5qeIG+CatT8x8FAEA=="
-      },
       "Microsoft.CodeAnalysis.VisualBasic": {
         "type": "Direct",
         "requested": "[3.3.1, )",

@@ -1,13 +1,15 @@
 using Microsoft.CodeAnalysis;
 
-namespace MirrorSharp.Internal.Roslyn.Internals {
-    internal struct SignatureHelpOptionsData {
-        public Project Project { get; }
+namespace MirrorSharp.Internal.Roslyn.Internals;
 
-        private SignatureHelpOptionsData(Project project) {
-            Project = project;
-        }
+internal struct SignatureHelpOptionsData {
+    public Project Project { get; }
 
-        public static SignatureHelpOptionsData From(Project project) => new (project);
+    private SignatureHelpOptionsData(Project project) {
+        Project = project;
+    }
+
+    public static SignatureHelpOptionsData From(Project project) {
+        return new SignatureHelpOptionsData(project);
     }
 }

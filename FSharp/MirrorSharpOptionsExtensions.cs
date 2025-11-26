@@ -1,4 +1,5 @@
 using System;
+using Microsoft.IO;
 using MirrorSharp.FSharp;
 using MirrorSharp.FSharp.Internal;
 using MirrorSharp.Internal;
@@ -20,7 +21,7 @@ public static class MirrorSharpOptionsExtensions {
         options.Languages.Add(FSharpLanguage.Name, () => {
             var fsharp = new MirrorSharpFSharpOptions();
             setup?.Invoke(fsharp);
-            return new FSharpLanguage(fsharp, new Microsoft.IO.RecyclableMemoryStreamManager());
+            return new FSharpLanguage(fsharp, new RecyclableMemoryStreamManager());
         });
         return options;
     }

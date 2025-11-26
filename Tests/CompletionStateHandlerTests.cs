@@ -9,90 +9,90 @@ using Xunit;
 
 // ReSharper disable HeapView.ClosureAllocation
 
-namespace MirrorSharp.Tests {
-    using static CommandIds;
+namespace MirrorSharp.Tests;
 
-    public class CompletionStateHandlerTests {
-        [Fact]
-        public async Task ExecuteAsync_ProducesChangeForSelectedCompletion() {
-            var driver = MirrorSharpTestDriver.New().SetTextWithCursor("class C { void M(object o) { o| } }");
-            var completions = await TypeAndGetCompletionsAsync('.', driver);
+using static CommandIds;
 
-            var changes = await driver.SendWithRequiredResultAsync<ChangesResult>(CompletionState, IndexOf(completions, "ToString"));
+public class CompletionStateHandlerTests {
+    [Fact]
+    public async Task ExecuteAsync_ProducesChangeForSelectedCompletion() {
+        var driver = MirrorSharpTestDriver.New().SetTextWithCursor("class C { void M(object o) { o| } }");
+        var completions = await TypeAndGetCompletionsAsync('.', driver);
 
-            Assert.Equal("completion", changes.Reason);
-            Assert.Equal(
-                new[] { new { Start = 31, Length = 0, Text = "ToString" } },
-                changes.Changes.Select(c => new { c.Start, c.Length, c.Text })
-            );
-            Assert.Null(driver.Session.CurrentCompletion.List);
-        }
+        var changes = await driver.SendWithRequiredResultAsync<ChangesResult>(CompletionState, IndexOf(completions, "ToString"));
 
-        [Fact]
-        public async Task ExecuteAsync_ReplacesInterimTypedText() {
-            var driver = MirrorSharpTestDriver.New().SetTextWithCursor("class C { void M(object o) { o| } }");
-            var completions = await TypeAndGetCompletionsAsync('.', driver);
-            await driver.SendTypeCharsAsync("To");
+        Assert.Equal("completion", changes.Reason);
+        Assert.Equal(
+            new[] { new { Start = 31, Length = 0, Text = "ToString" } },
+            changes.Changes.Select(c => new { c.Start, c.Length, c.Text })
+        );
+        Assert.Null(driver.Session.CurrentCompletion.List);
+    }
 
-            var changes = await driver.SendWithRequiredResultAsync<ChangesResult>(CompletionState, IndexOf(completions, "ToString"));
+    [Fact]
+    public async Task ExecuteAsync_ReplacesInterimTypedText() {
+        var driver = MirrorSharpTestDriver.New().SetTextWithCursor("class C { void M(object o) { o| } }");
+        var completions = await TypeAndGetCompletionsAsync('.', driver);
+        await driver.SendTypeCharsAsync("To");
 
-            Assert.Equal(
-                new[] { new { Start = 31, Length = 2, Text = "ToString" } },
-                changes.Changes.Select(c => new { c.Start, c.Length, c.Text })
-            );
-            Assert.Null(driver.Session.CurrentCompletion.List);
-        }
+        var changes = await driver.SendWithRequiredResultAsync<ChangesResult>(CompletionState, IndexOf(completions, "ToString"));
 
-        [Fact]
-        public async Task ExecuteAsync_CancelsCompletion_WhenXIsProvidedInsteadOfIndex() {
-            var driver = MirrorSharpTestDriver.New().SetTextWithCursor("class C { void M(object o) { o| } }");
-            await TypeAndGetCompletionsAsync('.', driver);
+        Assert.Equal(
+            new[] { new { Start = 31, Length = 2, Text = "ToString" } },
+            changes.Changes.Select(c => new { c.Start, c.Length, c.Text })
+        );
+        Assert.Null(driver.Session.CurrentCompletion.List);
+    }
 
-            var result = await driver.SendWithOptionalResultAsync<ChangesResult>(CompletionState, 'X');
+    [Fact]
+    public async Task ExecuteAsync_CancelsCompletion_WhenXIsProvidedInsteadOfIndex() {
+        var driver = MirrorSharpTestDriver.New().SetTextWithCursor("class C { void M(object o) { o| } }");
+        await TypeAndGetCompletionsAsync('.', driver);
 
-            Assert.Null(result);
-            Assert.Null(driver.Session.CurrentCompletion.List);
-        }
+        var result = await driver.SendWithOptionalResultAsync<ChangesResult>(CompletionState, 'X');
 
-        [Fact]
-        public async Task ExecuteAsync_ForcesCompletion_WhenFIsProvidedInsteadOfIndex() {
-            var driver = MirrorSharpTestDriver.New().SetTextWithCursor("class C { void M(object o) { o.| } }");
+        Assert.Null(result);
+        Assert.Null(driver.Session.CurrentCompletion.List);
+    }
 
-            var result = await driver.SendWithRequiredResultAsync<CompletionsResult>(CompletionState, 'F');
+    [Fact]
+    public async Task ExecuteAsync_ForcesCompletion_WhenFIsProvidedInsteadOfIndex() {
+        var driver = MirrorSharpTestDriver.New().SetTextWithCursor("class C { void M(object o) { o.| } }");
 
-            Assert.NotNull(result);
-            Assert.Equal(
-                ObjectMembers.AllNames.OrderBy(n => n),
-                result.Completions.Select(i => i.DisplayText).OrderBy(n => n)
-            );
-        }
+        var result = await driver.SendWithRequiredResultAsync<CompletionsResult>(CompletionState, 'F');
 
-        [Fact]
-        public async Task ExecuteAsync_SendsItemInfo_WhenCompletionIsActiveAndIIsProvided() {
-            var driver = MirrorSharpTestDriver.New(MirrorSharpOptionsWithXmlDocumentation.Instance)
-                .SetTextWithCursor("class C { void M(object o) { o.| } }");
+        Assert.NotNull(result);
+        Assert.Equal(
+            ObjectMembers.AllNames.OrderBy(n => n),
+            result.Completions.Select(i => i.DisplayText).OrderBy(n => n)
+        );
+    }
 
-            var completions = await driver.SendWithRequiredResultAsync<CompletionsResult>(CompletionState, 'F');
-            var getHashCodeIndex = completions.Completions
-                .Select((c, index) => (c.DisplayText, index))
-                .First(x => x.DisplayText == nameof(GetHashCode))
-                .index;
-            var result = await driver.SendWithRequiredResultAsync<CompletionsItemInfoResult>(CompletionState, "I" + getHashCodeIndex);
+    [Fact]
+    public async Task ExecuteAsync_SendsItemInfo_WhenCompletionIsActiveAndIIsProvided() {
+        var driver = MirrorSharpTestDriver.New(MirrorSharpOptionsWithXmlDocumentation.Instance)
+            .SetTextWithCursor("class C { void M(object o) { o.| } }");
 
-            Assert.NotNull(result);
-            Assert.Equal(getHashCodeIndex, result.Index);
-            Assert.Equal(
-                "int object.GetHashCode()\r\nServes as the default hash function.",
-                string.Join("", result.Parts)
-            );
-        }
+        var completions = await driver.SendWithRequiredResultAsync<CompletionsResult>(CompletionState, 'F');
+        var getHashCodeIndex = completions.Completions
+            .Select((c, index) => (c.DisplayText, index))
+            .First(x => x.DisplayText == nameof(GetHashCode))
+            .index;
+        var result = await driver.SendWithRequiredResultAsync<CompletionsItemInfoResult>(CompletionState, "I" + getHashCodeIndex);
 
-        private static async Task<IList<CompletionsItem>> TypeAndGetCompletionsAsync(char @char, MirrorSharpTestDriver driver) {
-            return (await driver.SendWithRequiredResultAsync<CompletionsResult>(TypeChar, @char)).Completions;
-        }
+        Assert.NotNull(result);
+        Assert.Equal(getHashCodeIndex, result.Index);
+        Assert.Equal(
+            "int object.GetHashCode()\r\nServes as the default hash function.",
+            string.Join("", result.Parts)
+        );
+    }
 
-        private static int IndexOf(IEnumerable<CompletionsItem> completions, string displayText) {
-            return completions.Select((c, i) => new { c, i }).First(x => x.c.DisplayText?.Contains(displayText) ?? false).i;
-        }
+    private static async Task<IList<CompletionsItem>> TypeAndGetCompletionsAsync(char @char, MirrorSharpTestDriver driver) {
+        return (await driver.SendWithRequiredResultAsync<CompletionsResult>(TypeChar, @char)).Completions;
+    }
+
+    private static int IndexOf(IEnumerable<CompletionsItem> completions, string displayText) {
+        return completions.Select((c, i) => new { c, i }).First(x => x.c.DisplayText?.Contains(displayText) ?? false).i;
     }
 }

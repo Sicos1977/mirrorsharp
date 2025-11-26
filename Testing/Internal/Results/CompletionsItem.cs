@@ -4,14 +4,14 @@ using System.Collections.Generic;
 // ReSharper disable CollectionNeverUpdated.Global
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 
-namespace MirrorSharp.Testing.Internal.Results {
-    internal class CompletionsItem {
-        public CompletionsItem(string displayText) {
-            DisplayText = displayText;
-        }
+namespace MirrorSharp.Testing.Internal.Results;
 
-        public string DisplayText { get; }
-        public int? Priority { get; set; }
-        public IList<string> Kinds { get; } = new List<string>();
+internal class CompletionsItem {
+    public string DisplayText { get; }
+    public int? Priority { get; set; }
+    public IList<string> Kinds { get; } = new List<string>();
+
+    public CompletionsItem(string displayText) {
+        DisplayText = displayText;
     }
 }

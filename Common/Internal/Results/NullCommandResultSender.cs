@@ -4,26 +4,26 @@ using System.Threading;
 using System.Threading.Tasks;
 using MirrorSharp.Advanced;
 
-namespace MirrorSharp.Internal.Results {
-    internal class NullCommandResultSender : ICommandResultSender, IDisposable {
-        private readonly FastUtf8JsonWriter _jsonWriter;
+namespace MirrorSharp.Internal.Results;
 
-        public NullCommandResultSender(ArrayPool<byte> bufferPool) {
-            _jsonWriter = new FastUtf8JsonWriter(bufferPool);
-        }
+internal class NullCommandResultSender : ICommandResultSender, IDisposable {
+    private readonly FastUtf8JsonWriter _jsonWriter;
 
-        public Task SendJsonMessageAsync(CancellationToken cancellationToken) {
-            return cancellationToken.IsCancellationRequested ? Task.FromCanceled(cancellationToken) : Task.CompletedTask;
-        }
+    public NullCommandResultSender(ArrayPool<byte> bufferPool) {
+        _jsonWriter = new FastUtf8JsonWriter(bufferPool);
+    }
 
-        public IFastJsonWriter StartJsonMessage(string messageTypeName) {
-            _jsonWriter.Reset();
-            _jsonWriter.WriteStartObject();
-            return _jsonWriter;
-        }
+    public Task SendJsonMessageAsync(CancellationToken cancellationToken) {
+        return cancellationToken.IsCancellationRequested ? Task.FromCanceled(cancellationToken) : Task.CompletedTask;
+    }
 
-        public void Dispose() {
-            _jsonWriter.Dispose();
-        }
+    public IFastJsonWriter StartJsonMessage(string messageTypeName) {
+        _jsonWriter.Reset();
+        _jsonWriter.WriteStartObject();
+        return _jsonWriter;
+    }
+
+    public void Dispose() {
+        _jsonWriter.Dispose();
     }
 }

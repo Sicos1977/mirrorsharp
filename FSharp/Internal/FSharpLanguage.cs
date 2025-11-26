@@ -6,9 +6,9 @@ namespace MirrorSharp.FSharp.Internal;
 
 internal class FSharpLanguage : ILanguage {
     public const string Name = "F#";
+    private readonly RecyclableMemoryStreamManager _memoryStreamManager;
 
     private readonly MirrorSharpFSharpOptions _options;
-    private readonly RecyclableMemoryStreamManager _memoryStreamManager;
 
     public FSharpLanguage(MirrorSharpFSharpOptions options, RecyclableMemoryStreamManager memoryStreamManager) {
         _options = options;

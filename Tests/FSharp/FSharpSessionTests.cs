@@ -49,7 +49,7 @@ public class FSharpSessionTests {
             .WithOtherOption(option);
 
         // Act
-        var exception = await Record.ExceptionAsync(() => session.CompileAsync(new(), CancellationToken.None).AsTask());
+        var exception = await Record.ExceptionAsync(() => session.CompileAsync(new MemoryStream(), CancellationToken.None).AsTask());
 
         // Assert
         Assert.IsType<NotSupportedException>(exception);

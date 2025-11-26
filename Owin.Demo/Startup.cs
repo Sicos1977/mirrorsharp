@@ -1,29 +1,28 @@
 using System;
 using Microsoft.Owin;
-using Microsoft.Owin.StaticFiles;
 using Microsoft.Owin.FileSystems;
-using Owin;
+using Microsoft.Owin.StaticFiles;
 using MirrorSharp.Owin.Demo;
 using MirrorSharp.Owin.Demo.Extensions;
-using System.IO;
+using Owin;
 
 [assembly: OwinStartup(typeof(Startup), nameof(Startup.Configuration))]
 
-namespace MirrorSharp.Owin.Demo {
-    public class Startup {
-        private static readonly string MscorlibReferencePath = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86)
-            + @"\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6\mscorlib.dll";
+namespace MirrorSharp.Owin.Demo;
 
-        public void Configuration(IAppBuilder app) {
-            app.UseDefaultFiles()
-               .UseStaticFiles(new StaticFileOptions {
-                   FileSystem = new PhysicalFileSystem("wwwroot")
-               });
+public class Startup {
+    private static readonly string MscorlibReferencePath = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86)
+                                                           + @"\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6\mscorlib.dll";
 
-            app.MapMirrorSharp(
-                "/mirrorsharp",
+    public void Configuration(IAppBuilder app) {
+        app.UseDefaultFiles()
+            .UseStaticFiles(new StaticFileOptions {
+                FileSystem = new PhysicalFileSystem("wwwroot")
+            });
 
-                new MirrorSharpOptions {
+        app.MapMirrorSharp(
+            "/mirrorsharp",
+            new MirrorSharpOptions {
                     SelfDebugEnabled = true,
                     IncludeExceptionDetails = true
                 }
@@ -32,11 +31,9 @@ namespace MirrorSharp.Owin.Demo {
                     c.AddMetadataReferencesFromFiles(MscorlibReferencePath);
                 })
                 .EnableFSharp(),
-
-                new MirrorSharpServices {
-                    SetOptionsFromClient = new SetOptionsFromClientExtension()
-                }
-            );
-        }
+            new MirrorSharpServices {
+                SetOptionsFromClient = new SetOptionsFromClientExtension()
+            }
+        );
     }
 }

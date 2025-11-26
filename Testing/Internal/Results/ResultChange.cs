@@ -2,16 +2,16 @@
 // ReSharper disable CollectionNeverUpdated.Global
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 
-namespace MirrorSharp.Testing.Internal.Results {
-    internal class ResultChange {
-        public ResultChange(int start, int length, string text) {
-            Start = start;
-            Length = length;
-            Text = text;
-        }
+namespace MirrorSharp.Testing.Internal.Results;
 
-        public int Start { get; }
-        public int Length { get; }
-        public string Text { get; }
+internal class ResultChange {
+    public int Start { get; }
+    public int Length { get; }
+    public string Text { get; }
+
+    public ResultChange(int start, int length, string text) {
+        Start = start;
+        Length = length;
+        Text = text;
     }
 }

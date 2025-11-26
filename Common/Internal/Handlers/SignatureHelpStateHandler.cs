@@ -4,23 +4,23 @@ using System.Threading.Tasks;
 using MirrorSharp.Internal.Handlers.Shared;
 using MirrorSharp.Internal.Results;
 
-namespace MirrorSharp.Internal.Handlers {
-    internal class SignatureHelpStateHandler : ICommandHandler {
-        public char CommandId => CommandIds.SignatureHelpState;
-        private readonly ISignatureHelpSupport _signatureHelp;
+namespace MirrorSharp.Internal.Handlers;
 
-        public SignatureHelpStateHandler(ISignatureHelpSupport signatureHelp) {
-            _signatureHelp = signatureHelp;
-        }
+internal class SignatureHelpStateHandler : ICommandHandler {
+    private readonly ISignatureHelpSupport _signatureHelp;
 
-        public Task ExecuteAsync(AsyncData data, WorkSession session, ICommandResultSender sender, CancellationToken cancellationToken) {
-            var @char = FastConvert.Utf8BytesToChar(data.GetFirst().Span);
-            if (@char != 'F') {
-                // ReSharper disable once HeapView.BoxingAllocation
-                throw new FormatException($"Unknown SignatureHelp command '{@char}'.");
-            }
+    public SignatureHelpStateHandler(ISignatureHelpSupport signatureHelp) {
+        _signatureHelp = signatureHelp;
+    }
 
-            return _signatureHelp.ForceSignatureHelpAsync(session, sender, cancellationToken);
-        }
+    public char CommandId => CommandIds.SignatureHelpState;
+
+    public Task ExecuteAsync(AsyncData data, WorkSession session, ICommandResultSender sender, CancellationToken cancellationToken) {
+        var @char = FastConvert.Utf8BytesToChar(data.GetFirst().Span);
+        if (@char != 'F')
+            // ReSharper disable once HeapView.BoxingAllocation
+            throw new FormatException($"Unknown SignatureHelp command '{@char}'.");
+
+        return _signatureHelp.ForceSignatureHelpAsync(session, sender, cancellationToken);
     }
 }

@@ -5,9 +5,9 @@ using MirrorSharp.Testing.Results;
 // ReSharper disable CollectionNeverUpdated.Global
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 
-namespace MirrorSharp.Testing.Internal.Results {
-    internal class SignaturesResult {
-        public ResultSpan Span { get; } = new ResultSpan();
-        public IList<SignaturesItem> Signatures { get; } = new List<SignaturesItem>();
-    }
+namespace MirrorSharp.Testing.Internal.Results;
+
+internal class SignaturesResult {
+    public ResultSpan Span { get; } = new();
+    public IList<SignaturesItem> Signatures { get; } = new List<SignaturesItem>();
 }

@@ -18,14 +18,12 @@ app.UseWebSockets();
 app.MapMirrorSharp(
     "/mirrorsharp",
     new MirrorSharpOptions {
-        SelfDebugEnabled = true,
-        IncludeExceptionDetails = true
-    }
-    .SetupCSharp(o => {
-        o.MetadataReferences = GetAllReferences().ToImmutableList();
-    })
-    .EnableFSharp()
-    .EnableIL()
+            SelfDebugEnabled = true,
+            IncludeExceptionDetails = true
+        }
+        .SetupCSharp(o => { o.MetadataReferences = GetAllReferences().ToImmutableList(); })
+        .EnableFSharp()
+        .EnableIL()
 );
 
 app.Run();
@@ -35,9 +33,7 @@ static IEnumerable<MetadataReference> GetAllReferences() {
     yield return ReferenceAssembly("System.Collections");
     var assembly = typeof(IScriptGlobals).Assembly;
     yield return MetadataReference.CreateFromFile(assembly.Location);
-    foreach (var reference in assembly.GetReferencedAssemblies()) {
-        yield return ReferenceAssembly(reference.Name!);
-    }
+    foreach (var reference in assembly.GetReferencedAssemblies()) yield return ReferenceAssembly(reference.Name!);
 }
 
 static MetadataReference ReferenceAssembly(string name) {

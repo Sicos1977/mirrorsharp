@@ -1,13 +1,14 @@
 using System;
 using System.Text;
 
-namespace MirrorSharp.Internal {
-    internal static class EncodingExtensions {
-        public static string GetString(this Encoding encoding, ArraySegment<byte> segment) {
-            return encoding.GetString(segment.Array!, segment.Offset, segment.Count);
-        }
+namespace MirrorSharp.Internal;
 
-        #if NETSTANDARD2_0
+internal static class EncodingExtensions {
+    public static string GetString(this Encoding encoding, ArraySegment<byte> segment) {
+        return encoding.GetString(segment.Array!, segment.Offset, segment.Count);
+    }
+
+#if NETSTANDARD2_0
         public static unsafe int GetChars(this Encoding encoding, ReadOnlySpan<byte> bytes, Span<char> chars) {
             if (bytes.IsEmpty)
                 return 0;
@@ -41,6 +42,5 @@ namespace MirrorSharp.Internal {
                 decoder.Convert(bytePointer, bytes.Length, charPointer, chars.Length, flush, out bytesUsed, out charsUsed, out completed);
             }
         }
-        #endif
-    }
+#endif
 }

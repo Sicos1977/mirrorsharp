@@ -1,17 +1,17 @@
 using FSharp.Compiler.CodeAnalysis;
 
-namespace MirrorSharp.FSharp.Advanced {
-    /// <summary>Represent combined Parse and Check results from the <see cref="FSharpChecker" />.</summary>
-    public class FSharpParseAndCheckResults {
-        internal FSharpParseAndCheckResults(FSharpParseFileResults parseResults, FSharpCheckFileAnswer checkAnswer) {
-            ParseResults = parseResults;
-            CheckAnswer = checkAnswer;
-        }
+namespace MirrorSharp.FSharp.Advanced;
 
-        /// <summary>Gets the Parse results.</summary>
-        public FSharpParseFileResults ParseResults { get; }
+/// <summary>Represent combined Parse and Check results from the <see cref="FSharpChecker" />.</summary>
+public class FSharpParseAndCheckResults {
+    /// <summary>Gets the Parse results.</summary>
+    public FSharpParseFileResults ParseResults { get; }
 
-        /// <summary>Gets the Check answer.</summary>
-        public FSharpCheckFileAnswer CheckAnswer { get; }
+    /// <summary>Gets the Check answer.</summary>
+    public FSharpCheckFileAnswer CheckAnswer { get; }
+
+    internal FSharpParseAndCheckResults(FSharpParseFileResults parseResults, FSharpCheckFileAnswer checkAnswer) {
+        ParseResults = parseResults;
+        CheckAnswer = checkAnswer;
     }
 }

@@ -7,223 +7,223 @@ using Microsoft.FSharp.Core;
 using MirrorSharp.FSharp.Advanced;
 using MirrorSharp.Internal;
 
-namespace MirrorSharp.FSharp.Internal {
+namespace MirrorSharp.FSharp.Internal;
 
-    internal class CustomFileSystem : IFileSystem {
-        private const string VirtualPathPrefix = "#mirrorsharp-virtual-fs";
-        private const string VirtualTempPath = VirtualPathPrefix + "temp";
+internal class CustomFileSystem : IFileSystem {
+    private const string VirtualPathPrefix = "#mirrorsharp-virtual-fs";
+    private const string VirtualTempPath = VirtualPathPrefix + "temp";
+    private readonly ConcurrentDictionary<string, bool> _directoryExistsCache = new();
+    private readonly ConcurrentDictionary<string, byte[]> _fileBytesCache = new();
+    private readonly ConcurrentDictionary<string, bool> _fileExistsCache = new();
 
-        private readonly ConcurrentDictionary<string, FSharpVirtualFile> _virtualFiles = new();
-        private readonly ConcurrentDictionary<string, byte[]> _fileBytesCache = new();
-        private readonly ConcurrentDictionary<string, bool> _fileExistsCache = new();
-        private readonly ConcurrentDictionary<string, bool> _directoryExistsCache = new();
+    private readonly ConcurrentDictionary<string, FSharpVirtualFile> _virtualFiles = new();
 
-        public static CustomFileSystem Instance { get; } = new CustomFileSystem();
+    public static CustomFileSystem Instance { get; } = new();
 
-        private CustomFileSystem() {
-            AssemblyLoader = new CustomAssemblyLoader();
-        }
+    private CustomFileSystem() {
+        AssemblyLoader = new CustomAssemblyLoader();
+    }
 
-        public Stream OpenFileForReadShim(string filePath, FSharpOption<bool> useMemoryMappedFile, FSharpOption<bool> shouldShadowCopy) {
-            if (GetVirtualFile(filePath) is { } virtualFile)
-                return virtualFile.GetStreamWrapper().Reuse();
+    public Stream OpenFileForReadShim(string filePath, FSharpOption<bool> useMemoryMappedFile, FSharpOption<bool> shouldShadowCopy) {
+        if (GetVirtualFile(filePath) is { } virtualFile)
+            return virtualFile.GetStreamWrapper().Reuse();
 
-            EnsureIsAssemblyFile(filePath);
-            // For some reason, F# compiler requests this for same file many, many times.
-            // Obviously, repeated IO is a bad idea.
-            // Caching isn't great either, but will do for now.
-            //
-            // Note: This has to create a new MemoryStream for now. CustomFileSystem is shared between
-            // multiple sessions, and dlls/assemblies are the same (as compared to "virtual files"
-            // which are added per session and have unique names).
-            return new MemoryStream(_fileBytesCache.GetOrAdd(filePath, f => File.ReadAllBytes(f)));
-        }
+        EnsureIsAssemblyFile(filePath);
+        // For some reason, F# compiler requests this for same file many, many times.
+        // Obviously, repeated IO is a bad idea.
+        // Caching isn't great either, but will do for now.
+        //
+        // Note: This has to create a new MemoryStream for now. CustomFileSystem is shared between
+        // multiple sessions, and dlls/assemblies are the same (as compared to "virtual files"
+        // which are added per session and have unique names).
+        return new MemoryStream(_fileBytesCache.GetOrAdd(filePath, f => File.ReadAllBytes(f)));
+    }
 
-        public Stream OpenFileForWriteShim(string filePath, FSharpOption<FileMode> fileMode, FSharpOption<FileAccess> fileAccess, FSharpOption<FileShare> fileShare) {
-            if (GetVirtualFile(filePath) is {} virtualFile)
-                return virtualFile.GetStreamWrapper().Reuse();
+    public Stream OpenFileForWriteShim(string filePath, FSharpOption<FileMode> fileMode, FSharpOption<FileAccess> fileAccess, FSharpOption<FileShare> fileShare) {
+        if (GetVirtualFile(filePath) is { } virtualFile)
+            return virtualFile.GetStreamWrapper().Reuse();
 
-            throw new NotSupportedException();
-        }
+        throw new NotSupportedException();
+    }
 
-        public string GetFullPathShim(string fileName) {
-            if (IsSpecialRangeFileName(fileName))
-                return fileName;
-
-            if (fileName.StartsWith(VirtualPathPrefix))
-                return fileName;
-
-            if (!Path.IsPathRooted(fileName))
-                throw new NotSupportedException();
+    public string GetFullPathShim(string fileName) {
+        if (IsSpecialRangeFileName(fileName))
             return fileName;
-        }
 
-        public string GetFullFilePathInDirectoryShim(string dir, string fileName) {
-            var path = IsPathRootedShim(fileName) ? fileName : Path.Combine(dir, fileName);
-            return GetFullPathShim(path);
-        }
+        if (fileName.StartsWith(VirtualPathPrefix))
+            return fileName;
 
-        public string GetDirectoryNameShim(string path) {
-            if (path == "")
-                return ".";
+        if (!Path.IsPathRooted(fileName))
+            throw new NotSupportedException();
+        return fileName;
+    }
 
-            var dirName = Path.GetDirectoryName(path);
-            if (dirName == null)
-                return IsPathRootedShim(path) ? path : ".";
+    public string GetFullFilePathInDirectoryShim(string dir, string fileName) {
+        var path = IsPathRootedShim(fileName) ? fileName : Path.Combine(dir, fileName);
+        return GetFullPathShim(path);
+    }
 
-            return dirName == "" ? "." : dirName;
-        }
+    public string GetDirectoryNameShim(string path) {
+        if (path == "")
+            return ".";
 
-        public DateTime GetLastWriteTimeShim(string fileName) {
-            if (GetVirtualFile(fileName) is {} virtualFile)
-                return virtualFile.LastWriteTime;
+        var dirName = Path.GetDirectoryName(path);
+        if (dirName == null)
+            return IsPathRootedShim(path) ? path : ".";
 
-            EnsureIsAssemblyFile(fileName);
-            // pretend all assemblies are ancient and unchanging
-            // basically no support for assemblies dynamically changing during MirrorSharp session
-            // which should be fine
+        return dirName == "" ? "." : dirName;
+    }
+
+    public DateTime GetLastWriteTimeShim(string fileName) {
+        if (GetVirtualFile(fileName) is { } virtualFile)
+            return virtualFile.LastWriteTime;
+
+        EnsureIsAssemblyFile(fileName);
+        // pretend all assemblies are ancient and unchanging
+        // basically no support for assemblies dynamically changing during MirrorSharp session
+        // which should be fine
+        return DateTime.MinValue;
+    }
+
+    public DateTime GetCreationTimeShim(string path) {
+        if (GetVirtualFile(path) is { } virtualFile)
             return DateTime.MinValue;
-        }
 
-        public DateTime GetCreationTimeShim(string path) {
-            if (GetVirtualFile(path) is {} virtualFile)
-                return DateTime.MinValue;
+        EnsureIsAssemblyFile(path);
+        // pretend all assemblies are ancient and unchanging
+        // basically no support for assemblies dynamically changing during MirrorSharp session
+        // which should be fine
+        return DateTime.MinValue;
+    }
 
-            EnsureIsAssemblyFile(path);
-            // pretend all assemblies are ancient and unchanging
-            // basically no support for assemblies dynamically changing during MirrorSharp session
-            // which should be fine
-            return DateTime.MinValue;
-        }
+    public void CopyShim(string src, string dest, bool overwrite) {
+        throw new NotSupportedException();
+    }
 
-        public void CopyShim(string src, string dest, bool overwrite) {
+    public bool FileExistsShim(string fileName) {
+        if (GetVirtualFile(fileName) != null)
+            return true;
+
+        if (!IsAssemblyFile(fileName) || fileName.StartsWith(VirtualTempPath, StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        // For some reason, F# compiler requests this for same file many, many times.
+        // Obviously, repeated IO is a bad idea.
+        // Caching isn't great either, but will do for now.
+        return _fileExistsCache.GetOrAdd(fileName, f => File.Exists(f));
+    }
+
+    public void FileDeleteShim(string fileName) {
+        throw new NotSupportedException();
+    }
+
+    public string DirectoryCreateShim(string path) {
+        throw new NotSupportedException();
+    }
+
+    public bool DirectoryExistsShim(string path) {
+        if (path.StartsWith(VirtualTempPath, StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        if (path.StartsWith(VirtualPathPrefix, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return _directoryExistsCache.GetOrAdd(path, f => Directory.Exists(f));
+    }
+
+    public void DirectoryDeleteShim(string path) {
+        throw new NotSupportedException();
+    }
+
+    public IEnumerable<string> EnumerateFilesShim(string path, string pattern) {
+        throw new NotSupportedException();
+    }
+
+    public IEnumerable<string> EnumerateDirectoriesShim(string path) {
+        throw new NotSupportedException();
+    }
+
+    public string ChangeExtensionShim(string path, string extension) {
+        throw new NotImplementedException();
+    }
+
+    public string GetTempPathShim() {
+        return VirtualTempPath;
+    }
+
+    public string NormalizePathShim(string path) {
+        return GetFullPathShim(path);
+    }
+
+    public bool IsInvalidPathShim(string filename) {
+        return filename.IndexOfAny(Path.GetInvalidPathChars()) >= 0;
+    }
+
+    public bool IsPathRootedShim(string path) {
+        if (path.StartsWith(VirtualPathPrefix))
+            return true;
+
+        return Path.IsPathRooted(path);
+    }
+
+    public bool IsStableFileHeuristic(string fileName) {
+        // FSharp.Core's default implementation.
+        var directory = Path.GetDirectoryName(fileName);
+        return directory.Contains("Reference Assemblies/")
+               || directory.Contains("Reference Assemblies\\")
+               || directory.Contains("packages/")
+               || directory.Contains("packages\\")
+               || directory.Contains("lib/mono/");
+    }
+
+    public IAssemblyLoader AssemblyLoader { get; }
+
+    private static void EnsureIsAssemblyFile(string fileName) {
+        if (!IsAssemblyFile(fileName))
             throw new NotSupportedException();
+    }
+
+    private static bool IsAssemblyFile(string fileName) {
+        return fileName.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)
+               || fileName.EndsWith(".optdata", StringComparison.OrdinalIgnoreCase)
+               || fileName.EndsWith(".sigdata", StringComparison.OrdinalIgnoreCase)
+               || fileName.EndsWith(".win32manifest", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsSpecialRangeFileName(string fileName) {
+        // File names used for ranges that are outside of specific source files
+        // https://github.com/dotnet/fsharp/blob/dc81e22205550f0cedf4295b06c3a1e338c1cfa1/src/fsharp/range.fs#L226-L228
+        return fileName is "unknown" or "startup" or "commandLineArgs"
+            // https://github.com/dotnet/fsharp/blob/dc81e22205550f0cedf4295b06c3a1e338c1cfa1/src/fsharp/service/ServiceParsedInputOps.fs#L548
+            or "";
+    }
+
+    public FSharpVirtualFile RegisterVirtualFile<TGetStreamContext>(
+        Func<TGetStreamContext, MemoryStream> getStream,
+        TGetStreamContext getStreamContext,
+        string? fileName = null
+    ) {
+        Argument.NotNull(nameof(getStream), getStream);
+
+        var path = Path.Combine(VirtualPathPrefix, Guid.NewGuid().ToString("D"));
+        if (fileName != null)
+            path = Path.Combine(path, fileName);
+
+        var file = (FSharpVirtualFile?)null;
+        try {
+            file = new FSharpVirtualFile<TGetStreamContext>(path, getStream, getStreamContext, _virtualFiles);
+            _virtualFiles.TryAdd(path, file);
+            return file;
         }
-
-        public bool FileExistsShim(string fileName) {
-            if (GetVirtualFile(fileName) != null)
-                return true;
-
-            if (!IsAssemblyFile(fileName) || fileName.StartsWith(VirtualTempPath, StringComparison.OrdinalIgnoreCase))
-                return false;
-
-            // For some reason, F# compiler requests this for same file many, many times.
-            // Obviously, repeated IO is a bad idea.
-            // Caching isn't great either, but will do for now.
-            return _fileExistsCache.GetOrAdd(fileName, f => File.Exists(f));
+        catch {
+            file?.Dispose();
+            throw;
         }
+    }
 
-        public void FileDeleteShim(string fileName) {
-            throw new NotSupportedException();
-        }
-
-        public string DirectoryCreateShim(string path) {
-            throw new NotSupportedException();
-        }
-
-        public bool DirectoryExistsShim(string path) {
-            if (path.StartsWith(VirtualTempPath, StringComparison.OrdinalIgnoreCase))
-                return false;
-
-            if (path.StartsWith(VirtualPathPrefix, StringComparison.OrdinalIgnoreCase))
-                return true;
-
-            return _directoryExistsCache.GetOrAdd(path, f => Directory.Exists(f));
-        }
-
-        public void DirectoryDeleteShim(string path) {
-            throw new NotSupportedException();
-        }
-
-        public IEnumerable<string> EnumerateFilesShim(string path, string pattern) {
-            throw new NotSupportedException();
-        }
-
-        public IEnumerable<string> EnumerateDirectoriesShim(string path) {
-            throw new NotSupportedException();
-        }
-
-        public string ChangeExtensionShim(string path, string extension) {
-            throw new NotImplementedException();
-        }
-
-        public string GetTempPathShim() {
-            return VirtualTempPath;
-        }
-
-        public string NormalizePathShim(string path) {
-            return GetFullPathShim(path);
-        }
-
-        public bool IsInvalidPathShim(string filename) {
-            return filename.IndexOfAny(Path.GetInvalidPathChars()) >= 0;
-        }
-
-        public bool IsPathRootedShim(string path) {
-            if (path.StartsWith(VirtualPathPrefix))
-                return true;
-
-            return Path.IsPathRooted(path);
-        }
-
-        public bool IsStableFileHeuristic(string fileName) {
-            // FSharp.Core's default implementation.
-            var directory = Path.GetDirectoryName(fileName);
-            return directory.Contains("Reference Assemblies/")
-                || directory.Contains("Reference Assemblies\\")
-                || directory.Contains("packages/")
-                || directory.Contains("packages\\")
-                || directory.Contains("lib/mono/");
-        }
-
-        public IAssemblyLoader AssemblyLoader { get; }
-
-        private static void EnsureIsAssemblyFile(string fileName) {
-            if (!IsAssemblyFile(fileName))
-                throw new NotSupportedException();
-        }
-
-        private static bool IsAssemblyFile(string fileName) {
-            return fileName.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)
-                || fileName.EndsWith(".optdata", StringComparison.OrdinalIgnoreCase)
-                || fileName.EndsWith(".sigdata", StringComparison.OrdinalIgnoreCase)
-                || fileName.EndsWith(".win32manifest", StringComparison.OrdinalIgnoreCase);
-        }
-
-        private static bool IsSpecialRangeFileName(string fileName) {
-            // File names used for ranges that are outside of specific source files
-            // https://github.com/dotnet/fsharp/blob/dc81e22205550f0cedf4295b06c3a1e338c1cfa1/src/fsharp/range.fs#L226-L228
-            return fileName is "unknown" or "startup" or "commandLineArgs"
-                // https://github.com/dotnet/fsharp/blob/dc81e22205550f0cedf4295b06c3a1e338c1cfa1/src/fsharp/service/ServiceParsedInputOps.fs#L548
-                or "";
-        }
-
-        public FSharpVirtualFile RegisterVirtualFile<TGetStreamContext>(
-            Func<TGetStreamContext, MemoryStream> getStream,
-            TGetStreamContext getStreamContext,
-            string? fileName = null
-        ) {
-            Argument.NotNull(nameof(getStream), getStream);
-
-            var path = Path.Combine(VirtualPathPrefix, Guid.NewGuid().ToString("D"));
-            if (fileName != null)
-                path = Path.Combine(path, fileName);
-
-            var file = (FSharpVirtualFile?)null;
-            try {
-                file = new FSharpVirtualFile<TGetStreamContext>(path, getStream, getStreamContext, _virtualFiles);
-                _virtualFiles.TryAdd(path, file);
-                return file;
-            }
-            catch {
-                file?.Dispose();
-                throw;
-            }
-        }
-
-        private FSharpVirtualFile? GetVirtualFile(string path)
-            => _virtualFiles.TryGetValue(path, out var file)
-             ? file
-             : null;
+    private FSharpVirtualFile? GetVirtualFile(string path) {
+        return _virtualFiles.TryGetValue(path, out var file)
+            ? file
+            : null;
     }
 }

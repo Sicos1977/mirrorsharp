@@ -1,10 +1,10 @@
 using System;
-using Microsoft.FSharp.Collections;
 using FSharp.Compiler.CodeAnalysis;
+using Microsoft.FSharp.Collections;
+using Microsoft.FSharp.Core;
 using MirrorSharp.FSharp.Advanced;
 using Xunit;
 using range = FSharp.Compiler.Text.Range;
-using Microsoft.FSharp.Core;
 
 namespace MirrorSharp.Tests.FSharp;
 
@@ -14,7 +14,7 @@ public class FSharpProjectOptionsExtensionsTests {
     [InlineData(new[] { "--optimize-" }, false)]
     [InlineData(new string[0], null)]
     public void WithOtherOptionOptimize_ReturnsSameInstance_IfValueIsTheSame(string[] otherOptions, bool? newValue) {
-        var options = NewOptions(otherOptions: otherOptions);
+        var options = NewOptions(otherOptions);
         var updated = options.WithOtherOptionOptimize(newValue);
         Assert.Same(options, updated);
     }
@@ -24,10 +24,10 @@ public class FSharpProjectOptionsExtensionsTests {
     [InlineData(new[] { "--optimize+" }, null, new string[0])]
     [InlineData(new[] { "--optimize-" }, true, new[] { "--optimize+" })]
     [InlineData(new[] { "--optimize-" }, null, new string[0])]
-    [InlineData(new string[0], true,  new[] { "--optimize+" })]
+    [InlineData(new string[0], true, new[] { "--optimize+" })]
     [InlineData(new string[0], false, new[] { "--optimize-" })]
     public void WithOtherOptionOptimize_ReturnsExpectedOptions_IfValueIsNotTheSame(string[] otherOptions, bool? newValue, string[] expected) {
-        var options = NewOptions(otherOptions: otherOptions).WithOtherOptionOptimize(newValue);
+        var options = NewOptions(otherOptions).WithOtherOptionOptimize(newValue);
         Assert.Equal(expected, options.OtherOptions);
     }
 
@@ -38,7 +38,7 @@ public class FSharpProjectOptionsExtensionsTests {
     [InlineData(new[] { "--target:module" }, FSharpTargets.Module)]
     [InlineData(new string[0], null)]
     public void WithOtherOptionTarget_ReturnsSameInstance_IfValueIsTheSame(string[] otherOptions, string newValue) {
-        var options = NewOptions(otherOptions: otherOptions);
+        var options = NewOptions(otherOptions);
         var updated = options.WithOtherOptionTarget(newValue);
         Assert.Same(options, updated);
     }
@@ -46,9 +46,9 @@ public class FSharpProjectOptionsExtensionsTests {
     [Theory]
     [InlineData(new[] { "--target:exe" }, FSharpTargets.Library, new[] { "--target:library" })]
     [InlineData(new[] { "--target:library" }, FSharpTargets.Exe, new[] { "--target:exe" })]
-    [InlineData(new string[0], FSharpTargets.Library,  new[] { "--target:library" })]
+    [InlineData(new string[0], FSharpTargets.Library, new[] { "--target:library" })]
     public void WithOtherOptionTarget_ReturnsExpectedOptions_IfValueIsNotTheSame(string[] otherOptions, string newValue, string[] expected) {
-        var options = NewOptions(otherOptions: otherOptions).WithOtherOptionTarget(newValue);
+        var options = NewOptions(otherOptions).WithOtherOptionTarget(newValue);
         Assert.Equal(expected, options.OtherOptions);
     }
 
@@ -59,7 +59,7 @@ public class FSharpProjectOptionsExtensionsTests {
     [InlineData(new[] { "--define:TEST", "--define:DEBUG" }, false, new[] { "--define:TEST" })]
     [InlineData(new[] { "--define:TEST" }, false, new[] { "--define:TEST" })]
     public void WithOtherOptionDefine_ReturnsExpectedOptions_IfThereAreChanges(string[] otherOptions, bool defined, string[] expected) {
-        var options = NewOptions(otherOptions: otherOptions).WithOtherOptionDefine("DEBUG", defined);
+        var options = NewOptions(otherOptions).WithOtherOptionDefine("DEBUG", defined);
         Assert.Equal(expected, options.OtherOptions);
     }
 
@@ -68,7 +68,7 @@ public class FSharpProjectOptionsExtensionsTests {
     [InlineData(new[] { "--define:TEST", "--define:DEBUG" }, true)]
     [InlineData(new string[0], false)]
     public void WithOtherOptionDefine_ReturnsSameInstance_IfThereAreNoChanges(string[] otherOptions, bool defined) {
-        var options = NewOptions(otherOptions: otherOptions);
+        var options = NewOptions(otherOptions);
         var updated = options.WithOtherOptionDefine("DEBUG", defined);
         Assert.Same(options, updated);
     }

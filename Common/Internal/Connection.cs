@@ -10,174 +10,178 @@ using MirrorSharp.Advanced.EarlyAccess;
 using MirrorSharp.Internal.Handlers;
 using MirrorSharp.Internal.Results;
 
-namespace MirrorSharp.Internal {
-    internal class Connection : ICommandResultSender, IDisposable {
-        public static int InputBufferSize => 4096;
+namespace MirrorSharp.Internal;
 
-        private readonly ArrayPool<byte> _bufferPool;
-        private readonly IConnectionSendViewer? _sendViewer;
-        private readonly WebSocket _socket;
-        private readonly WorkSession _session;
-        private readonly ImmutableArray<ICommandHandler> _handlers;
-        private readonly byte[] _inputBuffer;
+internal class Connection : ICommandResultSender, IDisposable {
+    private readonly ArrayPool<byte> _bufferPool;
+    private readonly IExceptionLogger? _exceptionLogger;
+    private readonly ImmutableArray<ICommandHandler> _handlers;
+    private readonly byte[] _inputBuffer;
 
-        private readonly FastUtf8JsonWriter _messageWriter;
-        private readonly IConnectionOptions? _options;
-        private readonly IExceptionLogger? _exceptionLogger;
+    private readonly FastUtf8JsonWriter _messageWriter;
+    private readonly IConnectionOptions? _options;
+    private readonly IConnectionSendViewer? _sendViewer;
+    private readonly WorkSession _session;
+    private readonly WebSocket _socket;
 
-        private string? _currentMessageTypeName;
+    private string? _currentMessageTypeName;
+    public static int InputBufferSize => 4096;
 
-        public Connection(
-            WebSocket socket,
-            WorkSession session,
-            ImmutableArray<ICommandHandler> handlers,
-            ArrayPool<byte> bufferPool,
-            IConnectionSendViewer? sendViewer,
-            IExceptionLogger? exceptionLogger,
-            IConnectionOptions? options
-        ) {
-            _socket = socket;
-            _session = session;
-            _handlers = handlers;
-            _messageWriter = new FastUtf8JsonWriter(bufferPool);
-            _options = options;
-            _sendViewer = sendViewer;
-            _exceptionLogger = exceptionLogger;
-            _bufferPool = bufferPool;
-            _inputBuffer = bufferPool.Rent(InputBufferSize);
+    public bool IsConnected => _socket.State == WebSocketState.Open;
+
+    public Connection(
+        WebSocket socket,
+        WorkSession session,
+        ImmutableArray<ICommandHandler> handlers,
+        ArrayPool<byte> bufferPool,
+        IConnectionSendViewer? sendViewer,
+        IExceptionLogger? exceptionLogger,
+        IConnectionOptions? options
+    ) {
+        _socket = socket;
+        _session = session;
+        _handlers = handlers;
+        _messageWriter = new FastUtf8JsonWriter(bufferPool);
+        _options = options;
+        _sendViewer = sendViewer;
+        _exceptionLogger = exceptionLogger;
+        _bufferPool = bufferPool;
+        _inputBuffer = bufferPool.Rent(InputBufferSize);
+    }
+
+    IFastJsonWriter ICommandResultSender.StartJsonMessage(string messageTypeName) {
+        return StartJsonMessage(messageTypeName);
+    }
+
+    Task ICommandResultSender.SendJsonMessageAsync(CancellationToken cancellationToken) {
+        return SendJsonMessageAsync(cancellationToken);
+    }
+
+    public void Dispose() {
+        _bufferPool.Return(_inputBuffer);
+        _messageWriter.Dispose();
+        _session.Dispose();
+    }
+
+    public async Task ReceiveAndProcessAsync(CancellationToken cancellationToken) {
+        try {
+            await ReceiveAndProcessInternalAsync(cancellationToken).ConfigureAwait(false);
         }
-
-        public bool IsConnected => _socket.State == WebSocketState.Open;
-
-        public async Task ReceiveAndProcessAsync(CancellationToken cancellationToken) {
+        catch (Exception ex) {
+            var exception = ex;
             try {
-                await ReceiveAndProcessInternalAsync(cancellationToken).ConfigureAwait(false);
-            }
-            catch (Exception ex) {
-                var exception = ex;
                 try {
-                    try {
-                        _exceptionLogger?.LogException(exception, _session);
-                    }
-                    catch (Exception logException) {
-                        exception = new AggregateException(exception, logException);
-                    }
-                    var error = (_options?.IncludeExceptionDetails ?? false) ? exception.ToString() : "A server error has occurred.";
-                    await SendErrorAsync(error, cancellationToken).ConfigureAwait(false);
+                    _exceptionLogger?.LogException(exception, _session);
                 }
-                catch (Exception sendException) {
-                    throw new AggregateException(ex, sendException).Flatten();
+                catch (Exception logException) {
+                    exception = new AggregateException(exception, logException);
                 }
-                throw;
-            }
-        }
 
-        // ReSharper disable once HeapView.ClosureAllocation
-        private async Task ReceiveAndProcessInternalAsync(CancellationToken cancellationToken) {
-            var first = await _socket.ReceiveAsync(new ArraySegment<byte>(_inputBuffer), cancellationToken).ConfigureAwait(false);
-            if (first.MessageType == WebSocketMessageType.Close) {
-                await _socket.CloseAsync(first.CloseStatus ?? WebSocketCloseStatus.Empty, first.CloseStatusDescription, cancellationToken).ConfigureAwait(false);
-                return;
+                var error = _options?.IncludeExceptionDetails ?? false ? exception.ToString() : "A server error has occurred.";
+                await SendErrorAsync(error, cancellationToken).ConfigureAwait(false);
             }
-            
-            if (first.MessageType == WebSocketMessageType.Binary) {
-                await ReceiveToEndAsync(cancellationToken).ConfigureAwait(false);
-                throw new FormatException("Expected text data (received binary).");
+            catch (Exception sendException) {
+                throw new AggregateException(ex, sendException).Flatten();
             }
 
-            // it is important to record this conditionally on SelfDebug being enabled, otherwise
-            // we lose no-allocation performance by allocating here
-            var messageForDebug = _session.SelfDebug != null ? Encoding.UTF8.GetString(_inputBuffer, 0, first.Count) : null;
-            _session.SelfDebug?.Log("before", messageForDebug, _session.CursorPosition, _session.GetText());
+            throw;
+        }
+    }
 
-            var commandId = _inputBuffer[0];
-            var handler = ResolveHandler(commandId);
-            var last = first;
-            await handler.ExecuteAsync(
-                new AsyncData(
-                    _inputBuffer.AsMemory(1, first.Count - 1),
-                    !first.EndOfMessage,
-                    // Can we avoid this allocation?
-                    async () => {
-                        if (last.EndOfMessage)
-                            return null;
-                        last = await _socket.ReceiveAsync(new ArraySegment<byte>(_inputBuffer), cancellationToken).ConfigureAwait(false);
-                        return _inputBuffer.AsMemory(0, last.Count);
-                    }
-                ),
-                _session, this, cancellationToken
-            ).ConfigureAwait(false);
-
-            if (!last.EndOfMessage) {
-                await ReceiveToEndAsync(cancellationToken).ConfigureAwait(false);
-                // ReSharper disable once HeapView.BoxingAllocation
-                throw new InvalidOperationException($"Received message has unread data after command '{(char)commandId}'.");
-            }
-
-            _session.SelfDebug?.Log("after", messageForDebug, _session.CursorPosition, _session.GetText());
+    // ReSharper disable once HeapView.ClosureAllocation
+    private async Task ReceiveAndProcessInternalAsync(CancellationToken cancellationToken) {
+        var first = await _socket.ReceiveAsync(new ArraySegment<byte>(_inputBuffer), cancellationToken).ConfigureAwait(false);
+        if (first.MessageType == WebSocketMessageType.Close) {
+            await _socket.CloseAsync(first.CloseStatus ?? WebSocketCloseStatus.Empty, first.CloseStatusDescription, cancellationToken).ConfigureAwait(false);
+            return;
         }
 
-        private async Task ReceiveToEndAsync(CancellationToken cancellationToken) {
-            while (!(await _socket.ReceiveAsync(new ArraySegment<byte>(_inputBuffer), cancellationToken).ConfigureAwait(false)).EndOfMessage) {
-            }
+        if (first.MessageType == WebSocketMessageType.Binary) {
+            await ReceiveToEndAsync(cancellationToken).ConfigureAwait(false);
+            throw new FormatException("Expected text data (received binary).");
         }
 
-        private ICommandHandler ResolveHandler(byte commandId) {
-            var handlerIndex = commandId - (byte)'A';
-            if (handlerIndex < 0 || handlerIndex > _handlers.Length - 1) {
-                // ReSharper disable once HeapView.BoxingAllocation
-                throw new FormatException($"Invalid command: '{(char)commandId}'.");
-            }
+        // it is important to record this conditionally on SelfDebug being enabled, otherwise
+        // we lose no-allocation performance by allocating here
+        var messageForDebug = _session.SelfDebug != null ? Encoding.UTF8.GetString(_inputBuffer, 0, first.Count) : null;
+        _session.SelfDebug?.Log("before", messageForDebug, _session.CursorPosition, _session.GetText());
 
-            var handler = _handlers[handlerIndex];
-            if (handler == null) {
-                // ReSharper disable once HeapView.BoxingAllocation
-                throw new FormatException($"Unknown command: '{(char)commandId}'.");
-            }
-            return handler;
+        var commandId = _inputBuffer[0];
+        var handler = ResolveHandler(commandId);
+        var last = first;
+        await handler.ExecuteAsync(
+            new AsyncData(
+                _inputBuffer.AsMemory(1, first.Count - 1),
+                !first.EndOfMessage,
+                // Can we avoid this allocation?
+                async () => {
+                    if (last.EndOfMessage)
+                        return null;
+                    last = await _socket.ReceiveAsync(new ArraySegment<byte>(_inputBuffer), cancellationToken).ConfigureAwait(false);
+                    return _inputBuffer.AsMemory(0, last.Count);
+                }
+            ),
+            _session, this, cancellationToken
+        ).ConfigureAwait(false);
+
+        if (!last.EndOfMessage) {
+            await ReceiveToEndAsync(cancellationToken).ConfigureAwait(false);
+            // ReSharper disable once HeapView.BoxingAllocation
+            throw new InvalidOperationException($"Received message has unread data after command '{(char)commandId}'.");
         }
 
-        private Task SendErrorAsync(string message, CancellationToken cancellationToken) {
-            var writer = StartJsonMessage("error");
-            writer.WriteProperty("message", message);
-            return SendJsonMessageAsync(cancellationToken);
+        _session.SelfDebug?.Log("after", messageForDebug, _session.CursorPosition, _session.GetText());
+    }
+
+    private async Task ReceiveToEndAsync(CancellationToken cancellationToken) {
+        while (!(await _socket.ReceiveAsync(new ArraySegment<byte>(_inputBuffer), cancellationToken).ConfigureAwait(false)).EndOfMessage) {
         }
+    }
 
-        private FastUtf8JsonWriter StartJsonMessage(string messageTypeName) {
-            _messageWriter.Reset();
-            _messageWriter.WriteStartObject();
-            _messageWriter.WriteProperty("type", messageTypeName);
-            _currentMessageTypeName = messageTypeName;
-            return _messageWriter;
-        }
+    private ICommandHandler ResolveHandler(byte commandId) {
+        var handlerIndex = commandId - (byte)'A';
+        if (handlerIndex < 0 || handlerIndex > _handlers.Length - 1)
+            // ReSharper disable once HeapView.BoxingAllocation
+            throw new FormatException($"Invalid command: '{(char)commandId}'.");
 
-        private Task SendJsonMessageAsync(CancellationToken cancellationToken) {
-            _messageWriter.WriteEndObject();
+        var handler = _handlers[handlerIndex];
+        if (handler == null)
+            // ReSharper disable once HeapView.BoxingAllocation
+            throw new FormatException($"Unknown command: '{(char)commandId}'.");
+        return handler;
+    }
 
-            var viewTask = _sendViewer?.ViewDuringSendAsync(_currentMessageTypeName!, _messageWriter.WrittenSegment, _session, cancellationToken);
-            var sendTask = _socket.SendAsync(
-                _messageWriter.WrittenSegment,
-                WebSocketMessageType.Text, true, cancellationToken
-            );
+    private Task SendErrorAsync(string message, CancellationToken cancellationToken) {
+        var writer = StartJsonMessage("error");
+        writer.WriteProperty("message", message);
+        return SendJsonMessageAsync(cancellationToken);
+    }
 
-            if (viewTask is { IsCompleted: false })
-                return WhenAll(viewTask, sendTask);
+    private FastUtf8JsonWriter StartJsonMessage(string messageTypeName) {
+        _messageWriter.Reset();
+        _messageWriter.WriteStartObject();
+        _messageWriter.WriteProperty("type", messageTypeName);
+        _currentMessageTypeName = messageTypeName;
+        return _messageWriter;
+    }
 
-            return sendTask;
-        }
+    private Task SendJsonMessageAsync(CancellationToken cancellationToken) {
+        _messageWriter.WriteEndObject();
 
-        private async Task WhenAll(Task first, Task second) {
-            await first;
-            await second;
-        }
+        var viewTask = _sendViewer?.ViewDuringSendAsync(_currentMessageTypeName!, _messageWriter.WrittenSegment, _session, cancellationToken);
+        var sendTask = _socket.SendAsync(
+            _messageWriter.WrittenSegment,
+            WebSocketMessageType.Text, true, cancellationToken
+        );
 
-        public void Dispose() {
-            _bufferPool.Return(_inputBuffer);
-            _messageWriter.Dispose();
-            _session.Dispose();
-        }
+        if (viewTask is { IsCompleted: false })
+            return WhenAll(viewTask, sendTask);
 
-        IFastJsonWriter ICommandResultSender.StartJsonMessage(string messageTypeName) => StartJsonMessage(messageTypeName);
-        Task ICommandResultSender.SendJsonMessageAsync(CancellationToken cancellationToken) => SendJsonMessageAsync(cancellationToken);
+        return sendTask;
+    }
+
+    private async Task WhenAll(Task first, Task second) {
+        await first;
+        await second;
     }
 }

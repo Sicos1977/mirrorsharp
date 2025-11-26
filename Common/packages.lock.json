@@ -39,12 +39,6 @@
           "Microsoft.CodeAnalysis.Workspaces.Common": "[3.3.1]"
         }
       },
-      "Microsoft.CodeAnalysis.PublicApiAnalyzers": {
-        "type": "Direct",
-        "requested": "[2.9.8, )",
-        "resolved": "2.9.8",
-        "contentHash": "oaanBu3yA/c5NUMVnpe8w7YcBRG7UmEKKnP7HxVt6lHb78XdNh8OTNFeVkVJhtlfDO1kX5y2iCeSkVSDdl9trw=="
-      },
       "Microsoft.CodeAnalysis.Workspaces.Common": {
         "type": "Direct",
         "requested": "[3.3.1, )",
@@ -959,12 +953,6 @@
           "Microsoft.CodeAnalysis.Features": "[3.3.1]",
           "Microsoft.CodeAnalysis.Workspaces.Common": "[3.3.1]"
         }
-      },
-      "Microsoft.CodeAnalysis.PublicApiAnalyzers": {
-        "type": "Direct",
-        "requested": "[2.9.8, )",
-        "resolved": "2.9.8",
-        "contentHash": "oaanBu3yA/c5NUMVnpe8w7YcBRG7UmEKKnP7HxVt6lHb78XdNh8OTNFeVkVJhtlfDO1kX5y2iCeSkVSDdl9trw=="
       },
       "Microsoft.CodeAnalysis.Workspaces.Common": {
         "type": "Direct",

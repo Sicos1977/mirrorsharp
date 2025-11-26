@@ -1,20 +1,20 @@
 using MirrorSharp.Internal;
 using MirrorSharp.Internal.Abstraction;
 
-namespace MirrorSharp.Php.Internal {
-    internal class PhpLanguage : ILanguage {
-        public const string Name = "PHP";
+namespace MirrorSharp.Php.Internal;
 
-        private readonly MirrorSharpPhpOptions _options;
+internal class PhpLanguage : ILanguage {
+    public const string Name = "PHP";
 
-        public PhpLanguage(MirrorSharpPhpOptions options) {
-            _options = options;
-        }
+    private readonly MirrorSharpPhpOptions _options;
 
-        public ILanguageSessionInternal CreateSession(string text, ILanguageSessionExtensions extensions) {
-            return new PhpSession(text, _options);
-        }
-
-        string ILanguage.Name => Name;
+    public PhpLanguage(MirrorSharpPhpOptions options) {
+        _options = options;
     }
+
+    public ILanguageSessionInternal CreateSession(string text, ILanguageSessionExtensions extensions) {
+        return new PhpSession(text, _options);
+    }
+
+    string ILanguage.Name => Name;
 }

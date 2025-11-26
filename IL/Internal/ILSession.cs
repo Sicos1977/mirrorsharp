@@ -10,55 +10,64 @@ using MirrorSharp.IL.Advanced;
 using MirrorSharp.Internal.Abstraction;
 using Mobius.ILasm.Core;
 
-namespace MirrorSharp.IL.Internal {
-    // ReSharper disable once InconsistentNaming
-    internal class ILSession : ILanguageSessionInternal, IILSession, IILSessionInternal {
-        private readonly StringBuilder _textBuilder;
-        private string? _text;
+namespace MirrorSharp.IL.Internal;
 
-        public ILSession(string text) {
-            _textBuilder = new StringBuilder(text);
-            _text = text;
-        }
+// ReSharper disable once InconsistentNaming
+internal class ILSession : ILanguageSessionInternal, IILSession, IILSessionInternal {
+    private readonly StringBuilder _textBuilder;
+    private string? _text;
 
-        public Driver.Target Target { get; set; }
+    public ILSession(string text) {
+        _textBuilder = new StringBuilder(text);
+        _text = text;
+    }
 
-        public int TextLength => _textBuilder.Length;
+    public Driver.Target Target { get; set; }
 
-        public string GetText() {
-            _text ??= _textBuilder.ToString();
-            return _text;
-        }
+    public int TextLength => _textBuilder.Length;
 
-        public StringBuilder GetTextBuilderForReadsOnly() {
-            return _textBuilder;
-        }
+    public StringBuilder GetTextBuilderForReadsOnly() {
+        return _textBuilder;
+    }
 
-        public void ReplaceText(string? newText, int start = 0, int? length = null) {
-            if (length > 0)
-                _textBuilder.Remove(start, length.Value);
-            if (newText?.Length > 0)
-                _textBuilder.Insert(start, newText);
-            _text = null;
-        }
+    public string GetText() {
+        _text ??= _textBuilder.ToString();
+        return _text;
+    }
 
-        public Task<ImmutableArray<Diagnostic>> GetDiagnosticsAsync(CancellationToken cancellationToken) {
-            // TODO: Implement parsing and returning errors
-            return Task.FromResult(ImmutableArray<Diagnostic>.Empty);
-        }
+    public void ReplaceText(string? newText, int start = 0, int? length = null) {
+        if (length > 0)
+            _textBuilder.Remove(start, length.Value);
+        if (newText?.Length > 0)
+            _textBuilder.Insert(start, newText);
+        _text = null;
+    }
 
-        public bool ShouldTriggerCompletion(int cursorPosition, CompletionTrigger trigger)
-            => false; // not supported yet
+    public Task<ImmutableArray<Diagnostic>> GetDiagnosticsAsync(CancellationToken cancellationToken) {
+        // TODO: Implement parsing and returning errors
+        return Task.FromResult(ImmutableArray<Diagnostic>.Empty);
+    }
 
-        public Task<CompletionList?> GetCompletionsAsync(int cursorPosition, CompletionTrigger trigger, CancellationToken cancellationToken)
-            => Task.FromResult<CompletionList?>(CompletionList.Empty); // not supported yet
+    public bool ShouldTriggerCompletion(int cursorPosition, CompletionTrigger trigger) {
+        return false;
+        // not supported yet
+    }
 
-        public Task<CompletionDescription?> GetCompletionDescriptionAsync(CompletionItem item, CancellationToken cancellationToken)
-            => throw new NotSupportedException(); // not supported yet
+    public Task<CompletionList?> GetCompletionsAsync(int cursorPosition, CompletionTrigger trigger, CancellationToken cancellationToken) {
+        return Task.FromResult<CompletionList?>(CompletionList.Empty);
+        // not supported yet
+    }
 
-        public Task<CompletionChange> GetCompletionChangeAsync(TextSpan completionSpan, CompletionItem item, CancellationToken cancellationToken)
-            => throw new NotSupportedException(); // not supported yet
+    public Task<CompletionDescription?> GetCompletionDescriptionAsync(CompletionItem item, CancellationToken cancellationToken) {
+        throw new NotSupportedException();
+        // not supported yet
+    }
 
-        public void Dispose() { }
+    public Task<CompletionChange> GetCompletionChangeAsync(TextSpan completionSpan, CompletionItem item, CancellationToken cancellationToken) {
+        throw new NotSupportedException();
+        // not supported yet
+    }
+
+    public void Dispose() {
     }
 }
