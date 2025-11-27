@@ -2,6 +2,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using MirrorSharp.Internal.Roslyn.Internals;
 using System.Composition;
+// ReSharper disable UnusedMember.Global
 
 namespace MirrorSharp.Internal.Roslyn50;
 

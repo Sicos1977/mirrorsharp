@@ -14,43 +14,53 @@ namespace MirrorSharp.Internal.Roslyn49;
 
 [Shared]
 [Export(typeof(IDiagnosticAnalyzerService))]
-internal class MirrorSharpDiagnosticAnalyzerService : IDiagnosticAnalyzerService {
+internal class MirrorSharpDiagnosticAnalyzerService : IDiagnosticAnalyzerService
+{
     DiagnosticAnalyzerInfoCache IDiagnosticAnalyzerService.AnalyzerInfoCache { get; } = new();
     IGlobalOptionService IDiagnosticAnalyzerService.GlobalOptions => throw new NotSupportedException();
 
-    Task IDiagnosticAnalyzerService.ForceAnalyzeProjectAsync(Project project, CancellationToken cancellationToken) {
+    Task IDiagnosticAnalyzerService.ForceAnalyzeProjectAsync(Project project, CancellationToken cancellationToken)
+    {
         throw new NotSupportedException();
     }
 
-    Task<ImmutableArray<DiagnosticData>> IDiagnosticAnalyzerService.GetCachedDiagnosticsAsync(Workspace workspace, ProjectId? projectId, DocumentId? documentId, bool includeSuppressedDiagnostics, bool includeLocalDocumentDiagnostics, bool includeNonLocalDocumentDiagnostics, CancellationToken cancellationToken) {
+    Task<ImmutableArray<DiagnosticData>> IDiagnosticAnalyzerService.GetCachedDiagnosticsAsync(Workspace workspace, ProjectId? projectId, DocumentId? documentId, bool includeSuppressedDiagnostics, bool includeLocalDocumentDiagnostics, bool includeNonLocalDocumentDiagnostics, CancellationToken cancellationToken)
+    {
         throw new NotSupportedException();
     }
 
-    Task<ImmutableArray<DiagnosticData>> IDiagnosticAnalyzerService.GetDiagnosticsAsync(Solution solution, ProjectId? projectId, DocumentId? documentId, bool includeSuppressedDiagnostics, bool includeNonLocalDocumentDiagnostics, CancellationToken cancellationToken) {
+    Task<ImmutableArray<DiagnosticData>> IDiagnosticAnalyzerService.GetDiagnosticsAsync(Solution solution, ProjectId? projectId, DocumentId? documentId, bool includeSuppressedDiagnostics, bool includeNonLocalDocumentDiagnostics, CancellationToken cancellationToken)
+    {
         throw new NotSupportedException();
     }
 
-    Task<ImmutableArray<DiagnosticData>> IDiagnosticAnalyzerService.GetDiagnosticsForIdsAsync(Solution solution, ProjectId? projectId, DocumentId? documentId, ImmutableHashSet<string>? diagnosticIds, Func<DiagnosticAnalyzer, bool>? shouldIncludeAnalyzer, bool includeSuppressedDiagnostics, bool includeLocalDocumentDiagnostics, bool includeNonLocalDocumentDiagnostics, CancellationToken cancellationToken) {
+    Task<ImmutableArray<DiagnosticData>> IDiagnosticAnalyzerService.GetDiagnosticsForIdsAsync(Solution solution, ProjectId? projectId, DocumentId? documentId, ImmutableHashSet<string>? diagnosticIds, Func<DiagnosticAnalyzer, bool>? shouldIncludeAnalyzer, bool includeSuppressedDiagnostics, bool includeLocalDocumentDiagnostics, bool includeNonLocalDocumentDiagnostics, CancellationToken cancellationToken)
+    {
         throw new NotSupportedException();
     }
 
-    Task<ImmutableArray<DiagnosticData>> IDiagnosticAnalyzerService.GetDiagnosticsForSpanAsync(TextDocument document, TextSpan? range, Func<string, bool>? shouldIncludeDiagnostic, bool includeCompilerDiagnostics, bool includeSuppressedDiagnostics, ICodeActionRequestPriorityProvider priorityProvider, Func<string, IDisposable?>? addOperationScope, DiagnosticKind diagnosticKind, bool isExplicit, CancellationToken cancellationToken) {
+    Task<ImmutableArray<DiagnosticData>> IDiagnosticAnalyzerService.GetDiagnosticsForSpanAsync(TextDocument document, TextSpan? range, Func<string, bool>? shouldIncludeDiagnostic, bool includeCompilerDiagnostics, bool includeSuppressedDiagnostics, ICodeActionRequestPriorityProvider priorityProvider, Func<string, IDisposable?>? addOperationScope, DiagnosticKind diagnosticKind, bool isExplicit, CancellationToken cancellationToken)
+    {
         throw new NotSupportedException();
     }
 
-    Task<ImmutableArray<DiagnosticData>> IDiagnosticAnalyzerService.GetProjectDiagnosticsForIdsAsync(Solution solution, ProjectId? projectId, ImmutableHashSet<string>? diagnosticIds, Func<DiagnosticAnalyzer, bool>? shouldIncludeAnalyzer, bool includeSuppressedDiagnostics, bool includeNonLocalDocumentDiagnostics, CancellationToken cancellationToken) {
+    Task<ImmutableArray<DiagnosticData>> IDiagnosticAnalyzerService.GetProjectDiagnosticsForIdsAsync(Solution solution, ProjectId? projectId, ImmutableHashSet<string>? diagnosticIds, Func<DiagnosticAnalyzer, bool>? shouldIncludeAnalyzer, bool includeSuppressedDiagnostics, bool includeNonLocalDocumentDiagnostics, CancellationToken cancellationToken)
+    {
         throw new NotSupportedException();
     }
 
-    Task<ImmutableArray<DiagnosticData>> IDiagnosticAnalyzerService.GetSpecificCachedDiagnosticsAsync(Workspace workspace, object id, bool includeSuppressedDiagnostics, bool includeNonLocalDocumentDiagnostics, CancellationToken cancellationToken) {
+    Task<ImmutableArray<DiagnosticData>> IDiagnosticAnalyzerService.GetSpecificCachedDiagnosticsAsync(Workspace workspace, object id, bool includeSuppressedDiagnostics, bool includeNonLocalDocumentDiagnostics, CancellationToken cancellationToken)
+    {
         throw new NotSupportedException();
     }
 
-    void IDiagnosticAnalyzerService.Reanalyze(Workspace workspace, IEnumerable<ProjectId>? projectIds, IEnumerable<DocumentId>? documentIds, bool highPriority) {
+    void IDiagnosticAnalyzerService.Reanalyze(Workspace workspace, IEnumerable<ProjectId>? projectIds, IEnumerable<DocumentId>? documentIds, bool highPriority)
+    {
         throw new NotSupportedException();
     }
 
-    Task<(ImmutableArray<DiagnosticData> diagnostics, bool upToDate)> IDiagnosticAnalyzerService.TryGetDiagnosticsForSpanAsync(TextDocument document, TextSpan range, Func<string, bool>? shouldIncludeDiagnostic, bool includeSuppressedDiagnostics, ICodeActionRequestPriorityProvider priorityProvider, DiagnosticKind diagnosticKind, bool isExplicit, CancellationToken cancellationToken) {
+    Task<(ImmutableArray<DiagnosticData> diagnostics, bool upToDate)> IDiagnosticAnalyzerService.TryGetDiagnosticsForSpanAsync(TextDocument document, TextSpan range, Func<string, bool>? shouldIncludeDiagnostic, bool includeSuppressedDiagnostics, ICodeActionRequestPriorityProvider priorityProvider, DiagnosticKind diagnosticKind, bool isExplicit, CancellationToken cancellationToken)
+    {
         throw new NotSupportedException();
     }
 }

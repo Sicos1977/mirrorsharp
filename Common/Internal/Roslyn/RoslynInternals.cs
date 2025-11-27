@@ -54,27 +54,27 @@ internal class RoslynInternals(
         try
         {
             var assembly = LoadInternalsAssemblySlow(roslynVersion);
-            // CI build. TODO: SharpLab only?
-            if (roslynVersion is { Major: 42, Minor: 42 })
-            {
-                // Try previous versions, in case CI is not on newest yet
-                var fallback = GetAssemblyOrNullIfTypesFailToLoad(assembly)
-                               ?? GetAssemblyOrNullIfTypesFailToLoad(LoadInternalsAssemblySlow(new Version(5, 0)))
-                               ?? GetAssemblyOrNullIfTypesFailToLoad(LoadInternalsAssemblySlow(new Version(4, 14)))
-                               ?? GetAssemblyOrNullIfTypesFailToLoad(LoadInternalsAssemblySlow(new Version(4, 13)))
-                               ?? GetAssemblyOrNullIfTypesFailToLoad(LoadInternalsAssemblySlow(new Version(4, 12)))
-                               ?? GetAssemblyOrNullIfTypesFailToLoad(LoadInternalsAssemblySlow(new Version(4, 11)))
-                               ?? GetAssemblyOrNullIfTypesFailToLoad(LoadInternalsAssemblySlow(new Version(4, 10)))
-                               ?? GetAssemblyOrNullIfTypesFailToLoad(LoadInternalsAssemblySlow(new Version(4, 9)))
-                               ?? GetAssemblyOrNullIfTypesFailToLoad(LoadInternalsAssemblySlow(new Version(4, 8)))
-                               ?? GetAssemblyOrNullIfTypesFailToLoad(LoadInternalsAssemblySlow(new Version(4, 7)))
-                               ?? GetAssemblyOrNullIfTypesFailToLoad(LoadInternalsAssemblySlow(new Version(4, 6)))
-                               ?? GetAssemblyOrNullIfTypesFailToLoad(LoadInternalsAssemblySlow(new Version(4, 5)))
-                               ?? GetAssemblyOrNullIfTypesFailToLoad(LoadInternalsAssemblySlow(new Version(4, 4)))
-                               ?? GetAssemblyOrNullIfTypesFailToLoad(LoadInternalsAssemblySlow(new Version(4, 3)))
-                               ?? GetAssemblyOrNullIfTypesFailToLoad(LoadInternalsAssemblySlow(new Version(4, 2)));
-                assembly = fallback ?? assembly;
-            }
+            //// CI build. TODO: SharpLab only?
+            //if (roslynVersion is { Major: >= 4, Minor: 2 })
+            //{
+            //    // Try previous versions, in case CI is not on newest yet
+            //    var fallback = GetAssemblyOrNullIfTypesFailToLoad(assembly)
+            //                   ?? GetAssemblyOrNullIfTypesFailToLoad(LoadInternalsAssemblySlow(new Version(5, 0)))
+            //                   ?? GetAssemblyOrNullIfTypesFailToLoad(LoadInternalsAssemblySlow(new Version(4, 14)))
+            //                   ?? GetAssemblyOrNullIfTypesFailToLoad(LoadInternalsAssemblySlow(new Version(4, 13)))
+            //                   ?? GetAssemblyOrNullIfTypesFailToLoad(LoadInternalsAssemblySlow(new Version(4, 12)))
+            //                   ?? GetAssemblyOrNullIfTypesFailToLoad(LoadInternalsAssemblySlow(new Version(4, 11)))
+            //                   ?? GetAssemblyOrNullIfTypesFailToLoad(LoadInternalsAssemblySlow(new Version(4, 10)))
+            //                   ?? GetAssemblyOrNullIfTypesFailToLoad(LoadInternalsAssemblySlow(new Version(4, 9)))
+            //                   ?? GetAssemblyOrNullIfTypesFailToLoad(LoadInternalsAssemblySlow(new Version(4, 8)))
+            //                   ?? GetAssemblyOrNullIfTypesFailToLoad(LoadInternalsAssemblySlow(new Version(4, 7)))
+            //                   ?? GetAssemblyOrNullIfTypesFailToLoad(LoadInternalsAssemblySlow(new Version(4, 6)))
+            //                   ?? GetAssemblyOrNullIfTypesFailToLoad(LoadInternalsAssemblySlow(new Version(4, 5)))
+            //                   ?? GetAssemblyOrNullIfTypesFailToLoad(LoadInternalsAssemblySlow(new Version(4, 4)))
+            //                   ?? GetAssemblyOrNullIfTypesFailToLoad(LoadInternalsAssemblySlow(new Version(4, 3)))
+            //                   ?? GetAssemblyOrNullIfTypesFailToLoad(LoadInternalsAssemblySlow(new Version(4, 2)));
+            //    assembly = fallback ?? assembly;
+            //}
 
             PreloadInternalsAssemblyDependenciesSlow(assembly);
             EnsureInternalsTypesCanLoad(assembly);
@@ -87,21 +87,21 @@ internal class RoslynInternals(
     }
     #endregion
 
-    #region GetAssemblyOrNullIfTypesFailToLoad
-    private static Assembly? GetAssemblyOrNullIfTypesFailToLoad(Assembly assembly)
-    {
-        try
-        {
-            _ = assembly.DefinedTypes;
-        }
-        catch (ReflectionTypeLoadException)
-        {
-            return null;
-        }
+    //#region GetAssemblyOrNullIfTypesFailToLoad
+    //private static Assembly? GetAssemblyOrNullIfTypesFailToLoad(Assembly assembly)
+    //{
+    //    try
+    //    {
+    //        _ = assembly.DefinedTypes;
+    //    }
+    //    catch (ReflectionTypeLoadException)
+    //    {
+    //        return null;
+    //    }
 
-        return assembly;
-    }
-    #endregion
+    //    return assembly;
+    //}
+    //#endregion
 
     #region EnsureInternalsTypesCanLoad
     private static void EnsureInternalsTypesCanLoad(Assembly assembly)
@@ -127,8 +127,8 @@ internal class RoslynInternals(
         {
             var assemblyName = roslynVersion switch
             {
-                { Major: > 5 } => "MirrorSharp.Internal.Roslyn50.dll",
-                { Major: 4, Minor: 14 } => "MirrorSharp.Internal.Roslyn414.dll",
+                { Major: >= 5 } => "MirrorSharp.Internal.Roslyn50.dll",
+                { Major: 4, Minor: >= 14 } => "MirrorSharp.Internal.Roslyn414.dll",
                 { Major: 4, Minor: 13 } => "MirrorSharp.Internal.Roslyn413.dll",
                 { Major: 4, Minor: 12 } => "MirrorSharp.Internal.Roslyn412.dll",
                 { Major: 4, Minor: 11 } => "MirrorSharp.Internal.Roslyn411.dll",
@@ -145,7 +145,7 @@ internal class RoslynInternals(
                 { Major: 4 } => "MirrorSharp.Internal.Roslyn36.dll",
                 { Major: 3, Minor: >= 6 } => "MirrorSharp.Internal.Roslyn36.dll",
                 { Major: 3, Minor: >= 3 } => "MirrorSharp.Internal.Roslyn33.dll",
-                _ => throw new NotSupportedException()
+                _ => throw new NotSupportedException("Unsupported Roslyn version")
             };
 
             using var assemblyStream = typeof(RoslynInternals).Assembly.GetManifestResourceStream(assemblyName)!;
@@ -153,6 +153,7 @@ internal class RoslynInternals(
             return AssemblyLoadContext.Default.LoadFromStream(assemblyStream);
 #else
             byte[]? assemblyBytes = null;
+
             try
             {
                 assemblyBytes = ArrayPool<byte>.Shared.Rent((int)assemblyStream.Length);
