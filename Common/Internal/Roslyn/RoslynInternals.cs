@@ -15,16 +15,21 @@ namespace MirrorSharp.Internal.Roslyn;
 internal class RoslynInternals(
     ICodeActionInternals codeAction,
     IWorkspaceAnalyzerOptionsInternals workspaceAnalyzerOptions,
-    ISignatureHelpProviderWrapperResolver signatureHelpProviderResolver) {
-    private static readonly Lazy<Assembly> _internalAssembly = new(
-        LoadInternalsAssemblyWithDependenciesSlowUncached, LazyThreadSafetyMode.PublicationOnly
-    );
+    ISignatureHelpProviderWrapperResolver signatureHelpProviderResolver)
+{
+    #region Fields
+    private static readonly Lazy<Assembly> _internalAssembly = new(LoadInternalsAssemblyWithDependenciesSlowUncached, LazyThreadSafetyMode.PublicationOnly);
+    #endregion
 
+    #region Properties
     public ICodeActionInternals CodeAction { get; } = codeAction;
     public IWorkspaceAnalyzerOptionsInternals WorkspaceAnalyzerOptions { get; } = workspaceAnalyzerOptions;
     public ISignatureHelpProviderWrapperResolver SignatureHelpProviderResolver { get; } = signatureHelpProviderResolver;
+    #endregion
 
-    public static RoslynInternals Get(CompositionHost compositionHost) {
+    #region Get
+    public static RoslynInternals Get(CompositionHost compositionHost)
+    {
         Argument.NotNull(nameof(compositionHost), compositionHost);
         return new RoslynInternals(
             compositionHost.GetExport<ICodeActionInternals>(),
@@ -32,18 +37,26 @@ internal class RoslynInternals(
             compositionHost.GetExport<ISignatureHelpProviderWrapperResolver>()
         );
     }
+    #endregion
 
-    public static Assembly GetInternalsAssemblySlow() {
+    #region GetInternalsAssemblySlow
+    public static Assembly GetInternalsAssemblySlow()
+    {
         return _internalAssembly.Value;
     }
+    #endregion
 
-    private static Assembly LoadInternalsAssemblyWithDependenciesSlowUncached() {
+    #region LoadInternalsAssemblyWithDependenciesSlowUncached
+    private static Assembly LoadInternalsAssemblyWithDependenciesSlowUncached()
+    {
         var roslynVersion = RoslynAssemblies.MicrosoftCodeAnalysis.GetName().Version!;
         var assembly = LoadInternalsAssemblySlow(roslynVersion);
         // CI build. TODO: SharpLab only?
-        if (roslynVersion is { Major: 42, Minor: 42 }) {
+        if (roslynVersion is { Major: 42, Minor: 42 })
+        {
             // Try previous versions, in case CI is not on newest yet
             var fallback = GetAssemblyOrNullIfTypesFailToLoad(assembly)
+                           ?? GetAssemblyOrNullIfTypesFailToLoad(LoadInternalsAssemblySlow(new Version(5, 0)))
                            ?? GetAssemblyOrNullIfTypesFailToLoad(LoadInternalsAssemblySlow(new Version(4, 14)))
                            ?? GetAssemblyOrNullIfTypesFailToLoad(LoadInternalsAssemblySlow(new Version(4, 13)))
                            ?? GetAssemblyOrNullIfTypesFailToLoad(LoadInternalsAssemblySlow(new Version(4, 12)))
@@ -64,19 +77,27 @@ internal class RoslynInternals(
         EnsureInternalsTypesCanLoad(assembly);
         return assembly;
     }
+    #endregion
 
-    private static Assembly? GetAssemblyOrNullIfTypesFailToLoad(Assembly assembly) {
-        try {
+    #region GetAssemblyOrNullIfTypesFailToLoad
+    private static Assembly? GetAssemblyOrNullIfTypesFailToLoad(Assembly assembly)
+    {
+        try
+        {
             _ = assembly.DefinedTypes;
         }
-        catch (ReflectionTypeLoadException) {
+        catch (ReflectionTypeLoadException)
+        {
             return null;
         }
 
         return assembly;
     }
+    #endregion
 
-    private static void EnsureInternalsTypesCanLoad(Assembly assembly) {
+    #region EnsureInternalsTypesCanLoad
+    private static void EnsureInternalsTypesCanLoad(Assembly assembly)
+    {
         try {
             _ = assembly.DefinedTypes;
         }
@@ -89,9 +110,13 @@ internal class RoslynInternals(
             );
         }
     }
-
-    private static Assembly LoadInternalsAssemblySlow(Version roslynVersion) {
-        var assemblyName = roslynVersion switch {
+    #endregion
+    
+    #region LoadInternalsAssemblySlow
+    private static Assembly LoadInternalsAssemblySlow(Version roslynVersion)
+    {
+        var assemblyName = roslynVersion switch
+        {
             { Major: > 5 } => "MirrorSharp.Internal.Roslyn50.dll",
             { Major: 4, Minor: 14 } => "MirrorSharp.Internal.Roslyn414.dll",
             { Major: 4, Minor: 13 } => "MirrorSharp.Internal.Roslyn413.dll",
@@ -118,19 +143,25 @@ internal class RoslynInternals(
             return AssemblyLoadContext.Default.LoadFromStream(assemblyStream);
 #else
         byte[]? assemblyBytes = null;
-        try {
+        try
+        {
             assemblyBytes = ArrayPool<byte>.Shared.Rent((int)assemblyStream.Length);
             _ = assemblyStream.Read(assemblyBytes, 0, assemblyBytes.Length);
             return Assembly.Load(assemblyBytes);
         }
-        finally {
+        finally
+        {
             if (assemblyBytes != null)
                 ArrayPool<byte>.Shared.Return(assemblyBytes);
         }
 #endif
     }
+    #endregion
 
-    private static void PreloadInternalsAssemblyDependenciesSlow(Assembly assembly) {
+    #region PreloadInternalsAssemblyDependenciesSlow
+    private static void PreloadInternalsAssemblyDependenciesSlow(Assembly assembly) 
+    {
         foreach (var reference in assembly.GetReferencedAssemblies()) Assembly.Load(reference);
     }
+    #endregion
 }

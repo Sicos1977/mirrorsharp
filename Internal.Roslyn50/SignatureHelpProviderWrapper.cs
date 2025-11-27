@@ -15,7 +15,7 @@ internal class SignatureHelpProviderWrapper(ISignatureHelpProvider provider) : I
         // This is quite complicated to implement correctly and is still shifting around.
         // For now, we will only allow default options. There is no way to check if user
         // intended something different, but that can be implemented later.
-        var mappedOptions = new MemberDisplayOptions();
+        var mappedOptions = MemberDisplayOptions.Default;
         var mappedTriggerInfo = new SignatureHelpTriggerInfo((SignatureHelpTriggerReason)(int)triggerInfo.TriggerReason, triggerInfo.TriggerCharacter);
         var items = await provider.GetItemsAsync(document, position, mappedTriggerInfo, mappedOptions, cancellationToken).ConfigureAwait(false);
 
@@ -25,32 +25,25 @@ internal class SignatureHelpProviderWrapper(ISignatureHelpProvider provider) : I
         return new SignatureHelpItemsData(
             items.Items.Select(i => new SignatureHelpItemData(
                 i.DocumentationFactory,
-                i.PrefixDisplayParts,
-                i.SeparatorDisplayParts,
-                i.SuffixDisplayParts,
-                i.Parameters.Select(p => new SignatureHelpParameterData(
+                prefixDisplayParts: i.PrefixDisplayParts,
+                separatorDisplayParts: i.SeparatorDisplayParts,
+                suffixDisplayParts: i.SuffixDisplayParts,
+                parameters: i.Parameters.Select(p => new SignatureHelpParameterData(
                     p.Name,
                     p.DocumentationFactory,
-                    p.DisplayParts,
-                    p.PrefixDisplayParts,
-                    p.SuffixDisplayParts
+                    displayParts: p.DisplayParts,
+                    prefixDisplayParts: p.PrefixDisplayParts,
+                    suffixDisplayParts: p.SuffixDisplayParts
                 )),
                 i.Parameters.Length
             )),
-            items.ApplicableSpan,
-            items.SemanticParameterIndex,
-            items.SyntacticArgumentCount,
-            items.SelectedItemIndex
+            applicableSpan: items.ApplicableSpan,
+            argumentIndex: items.SemanticParameterIndex,
+            argumentCount: items.SyntacticArgumentCount,
+            selectedItemIndex: items.SelectedItemIndex
         );
     }
 
-    public bool IsRetriggerCharacter(char ch)
-    {
-        return provider.RetriggerCharacters.Contains(ch);
-    }
-
-    public bool IsTriggerCharacter(char ch)
-    {
-        return provider.TriggerCharacters.Contains(ch);
-    }
+    public bool IsRetriggerCharacter(char ch) => provider.TriggerCharacters.Contains(ch);
+    public bool IsTriggerCharacter(char ch) => provider.TriggerCharacters.Contains(ch);
 }

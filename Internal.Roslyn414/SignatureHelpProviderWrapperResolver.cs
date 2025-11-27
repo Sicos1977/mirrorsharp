@@ -11,11 +11,12 @@ namespace MirrorSharp.Internal.Roslyn414;
 
 [Export(typeof(ISignatureHelpProviderWrapperResolver))]
 [method: ImportingConstructor]
-internal class SignatureHelpProviderWrapperResolver([ImportMany] IEnumerable<Lazy<ISignatureHelpProvider, OrderableLanguageMetadata>> allProviders)
-    : ISignatureHelpProviderWrapperResolver {
+internal class SignatureHelpProviderWrapperResolver([ImportMany] IEnumerable<Lazy<ISignatureHelpProvider, OrderableLanguageMetadata>> allProviders) : ISignatureHelpProviderWrapperResolver
+{
     private readonly IList<Lazy<ISignatureHelpProvider, OrderableLanguageMetadata>> _allProviders = ExtensionOrderer.Order(allProviders);
 
-    public IEnumerable<ISignatureHelpProviderWrapper> GetAllSlow(string languageName) {
+    public IEnumerable<ISignatureHelpProviderWrapper> GetAllSlow(string languageName)
+    {
         if (languageName == null)
             throw new ArgumentNullException(nameof(languageName));
 

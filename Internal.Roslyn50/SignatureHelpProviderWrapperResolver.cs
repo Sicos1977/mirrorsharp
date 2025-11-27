@@ -15,7 +15,8 @@ internal class SignatureHelpProviderWrapperResolver([ImportMany] IEnumerable<Laz
 {
     private readonly IList<Lazy<ISignatureHelpProvider, OrderableLanguageMetadata>> _allProviders = ExtensionOrderer.Order(allProviders);
 
-    public IEnumerable<ISignatureHelpProviderWrapper> GetAllSlow(string languageName) {
+    public IEnumerable<ISignatureHelpProviderWrapper> GetAllSlow(string languageName)
+    {
         if (languageName == null)
             throw new ArgumentNullException(nameof(languageName));
 
