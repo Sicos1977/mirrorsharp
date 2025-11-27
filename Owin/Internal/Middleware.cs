@@ -10,12 +10,9 @@ namespace MirrorSharp.Owin.Internal;
 using AppFunc = Func<IDictionary<string, object>, Task>;
 using WebSocketAccept = Action<IDictionary<string, object>?, Func<IDictionary<string, object>, Task>>;
 
-internal class Middleware : MiddlewareBase {
-    private readonly AppFunc _next;
-
-    public Middleware(AppFunc next, MirrorSharpOptions options, MirrorSharpServices extensions) : base(options, extensions.ToImmutable()) {
-        _next = Argument.NotNull(nameof(next), next);
-    }
+internal class Middleware(AppFunc next, MirrorSharpOptions options, MirrorSharpServices extensions)
+    : MiddlewareBase(options, extensions.ToImmutable()) {
+    private readonly AppFunc _next = Argument.NotNull(nameof(next), next);
 
     public Task Invoke(IDictionary<string, object> environment) {
         object accept;

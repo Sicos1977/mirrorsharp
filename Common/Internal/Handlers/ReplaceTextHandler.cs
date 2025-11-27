@@ -8,24 +8,12 @@ using MirrorSharp.Internal.Results;
 
 namespace MirrorSharp.Internal.Handlers;
 
-internal class ReplaceTextHandler : ICommandHandler {
-    private readonly ArrayPool<char> _charArrayPool;
-    private readonly ICompletionSupport _completion;
-    private readonly ISignatureHelpSupport _signatureHelp;
-    private readonly ITypedCharEffects _typedCharEffects;
-
-    public ReplaceTextHandler(
-        ISignatureHelpSupport signatureHelp,
-        ICompletionSupport completion,
-        ITypedCharEffects typedCharEffects,
-        ArrayPool<char> charArrayPool
-    ) {
-        _signatureHelp = signatureHelp;
-        _completion = completion;
-        _typedCharEffects = typedCharEffects;
-        _charArrayPool = charArrayPool;
-    }
-
+internal class ReplaceTextHandler(
+    ISignatureHelpSupport signatureHelp,
+    ICompletionSupport completion,
+    ITypedCharEffects typedCharEffects,
+    ArrayPool<char> charArrayPool)
+    : ICommandHandler {
     public char CommandId => CommandIds.ReplaceText;
 
     public async Task ExecuteAsync(AsyncData data, WorkSession session, ICommandResultSender sender, CancellationToken cancellationToken) {
@@ -68,11 +56,11 @@ internal class ReplaceTextHandler : ICommandHandler {
         if (start == null || length == null || cursorPosition == null || reason == null)
             throw new FormatException("Command arguments must be 'start:length:cursor:reason:text'.");
 
-        var text = await AsyncDataConvert.ToUtf8StringAsync(data, partStart, _charArrayPool).ConfigureAwait(false);
+        var text = await AsyncDataConvert.ToUtf8StringAsync(data, partStart, charArrayPool).ConfigureAwait(false);
 
         session.ReplaceText(text, start.Value, length.Value);
         session.CursorPosition = cursorPosition.Value;
-        await _signatureHelp.ApplyCursorPositionChangeAsync(session, sender, cancellationToken).ConfigureAwait(false);
-        await _completion.ApplyReplacedTextAsync(reason, _typedCharEffects, session, sender, cancellationToken).ConfigureAwait(false);
+        await signatureHelp.ApplyCursorPositionChangeAsync(session, sender, cancellationToken).ConfigureAwait(false);
+        await completion.ApplyReplacedTextAsync(reason, typedCharEffects, session, sender, cancellationToken).ConfigureAwait(false);
     }
 }

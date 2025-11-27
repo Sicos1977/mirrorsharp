@@ -333,29 +333,23 @@ internal class FastUtf8JsonWriter : IFastJsonWriter {
         public static readonly byte[] EscapedQuote = Encoding.UTF8.GetBytes("\\\"");
     }
 
-    private class FastUtf8JsonStringWriter : TextWriter {
-        private readonly FastUtf8JsonWriter _owner;
-
+    private class FastUtf8JsonStringWriter(FastUtf8JsonWriter owner) : TextWriter {
         public override Encoding Encoding => Encoding.UTF8;
 
-        public FastUtf8JsonStringWriter(FastUtf8JsonWriter owner) {
-            _owner = owner;
-        }
-
         public override void Write(char value) {
-            _owner.WriteUnquotedChar(value);
+            owner.WriteUnquotedChar(value);
         }
 
         public override void Write(int value) {
-            _owner.WriteValue(value);
+            owner.WriteValue(value);
         }
 
         public override void Write(string? value) {
-            _owner.WriteUnquotedString(value);
+            owner.WriteUnquotedString(value);
         }
 
         protected override void Dispose(bool disposing) {
-            _owner.CloseString();
+            owner.CloseString();
         }
     }
 }

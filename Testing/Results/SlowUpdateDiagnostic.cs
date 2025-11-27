@@ -6,25 +6,17 @@ using System.Collections.Generic;
 
 namespace MirrorSharp.Testing.Results;
 
-public class SlowUpdateDiagnostic {
-    public string Id { get; }
-    public string Message { get; }
-    public string Severity { get; }
-    public ResultSpan Span { get; }
+public class SlowUpdateDiagnostic(
+    string id,
+    string message,
+    string severity,
+    ResultSpan span) {
+    public string Id { get; } = id;
+    public string Message { get; } = message;
+    public string Severity { get; } = severity;
+    public ResultSpan Span { get; } = span;
     public IList<string> Tags { get; } = new List<string>();
     public IList<SlowUpdateDiagnosticAction> Actions { get; } = new List<SlowUpdateDiagnosticAction>();
-
-    public SlowUpdateDiagnostic(
-        string id,
-        string message,
-        string severity,
-        ResultSpan span
-    ) {
-        Id = id;
-        Message = message;
-        Severity = severity;
-        Span = span;
-    }
 
     public override string ToString() {
         return $"{Severity} {Id}: {Message}";

@@ -6,13 +6,7 @@ using MirrorSharp.Internal.Results;
 
 namespace MirrorSharp.Internal.Handlers;
 
-internal class TypeCharHandler : ICommandHandler {
-    private readonly ITypedCharEffects _effects;
-
-    public TypeCharHandler(ITypedCharEffects effects) {
-        _effects = effects;
-    }
-
+internal class TypeCharHandler(ITypedCharEffects effects) : ICommandHandler {
     public char CommandId => CommandIds.TypeChar;
 
     public Task ExecuteAsync(AsyncData data, WorkSession session, ICommandResultSender sender, CancellationToken cancellationToken) {
@@ -24,6 +18,6 @@ internal class TypeCharHandler : ICommandHandler {
         session.ReplaceText(FastConvert.CharToString(@char), session.CursorPosition, 0);
         session.CursorPosition += 1;
 
-        return _effects.ApplyTypedCharAsync(@char, session, sender, cancellationToken);
+        return effects.ApplyTypedCharAsync(@char, session, sender, cancellationToken);
     }
 }

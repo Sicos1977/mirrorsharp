@@ -3,15 +3,8 @@ using System.Buffers;
 
 namespace MirrorSharp.Internal;
 
-internal struct PooledGrowableArray<T> : IDisposable {
-    private readonly ArrayPool<T> _pool;
-
-    public PooledGrowableArray(int initialLength, ArrayPool<T> pool) {
-        _pool = pool;
-        Array = pool.Rent(initialLength);
-    }
-
-    public T[] Array { get; private set; }
+internal struct PooledGrowableArray<T>(int initialLength, ArrayPool<T> pool) : IDisposable {
+    public T[] Array { get; private set; } = pool.Rent(initialLength);
 
     public void Grow(int newLength) {
         if (newLength <= Array.Length)
@@ -21,23 +14,23 @@ internal struct PooledGrowableArray<T> : IDisposable {
         var newArray = (T[]?)null;
         var oldArray = (T[]?)null;
         try {
-            newArray = _pool.Rent(actualNewLength);
+            newArray = pool.Rent(actualNewLength);
             System.Array.Copy(Array, 0, newArray, 0, Array.Length);
             oldArray = Array;
             Array = newArray;
         }
         catch (Exception) {
             if (Array != newArray && newArray != null)
-                _pool.Return(newArray);
+                pool.Return(newArray);
             throw;
         }
         finally {
             if (Array != oldArray && oldArray != null)
-                _pool.Return(oldArray);
+                pool.Return(oldArray);
         }
     }
 
     public void Dispose() {
-        _pool.Return(Array);
+        pool.Return(Array);
     }
 }

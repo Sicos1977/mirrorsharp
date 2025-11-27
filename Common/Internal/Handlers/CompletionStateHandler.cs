@@ -5,13 +5,7 @@ using MirrorSharp.Internal.Results;
 
 namespace MirrorSharp.Internal.Handlers;
 
-internal class CompletionStateHandler : ICommandHandler {
-    private readonly ICompletionSupport _completion;
-
-    public CompletionStateHandler(ICompletionSupport completion) {
-        _completion = completion;
-    }
-
+internal class CompletionStateHandler(ICompletionSupport completion) : ICommandHandler {
     public char CommandId => CommandIds.CompletionState;
 
     public Task ExecuteAsync(AsyncData data, WorkSession session, ICommandResultSender sender, CancellationToken cancellationToken) {
@@ -20,16 +14,16 @@ internal class CompletionStateHandler : ICommandHandler {
 
         if (firstByte == (byte)'I') {
             var infoItemIndex = FastConvert.Utf8BytesToInt32(first.Span.Slice(1));
-            return _completion.SendItemInfoAsync(infoItemIndex, session, sender, cancellationToken);
+            return completion.SendItemInfoAsync(infoItemIndex, session, sender, cancellationToken);
         }
 
         if (firstByte == (byte)'X')
-            return _completion.CancelCompletionAsync(session, sender, cancellationToken);
+            return completion.CancelCompletionAsync(session, sender, cancellationToken);
 
         if (firstByte == (byte)'F')
-            return _completion.ForceCompletionAsync(session, sender, cancellationToken);
+            return completion.ForceCompletionAsync(session, sender, cancellationToken);
 
         var itemIndex = FastConvert.Utf8BytesToInt32(first.Span);
-        return _completion.SelectCompletionAsync(itemIndex, session, sender, cancellationToken);
+        return completion.SelectCompletionAsync(itemIndex, session, sender, cancellationToken);
     }
 }

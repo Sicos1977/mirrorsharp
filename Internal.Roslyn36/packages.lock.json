@@ -4,9 +4,9 @@
     ".NETStandard,Version=v2.0": {
       "IgnoresAccessChecksToGenerator": {
         "type": "Direct",
-        "requested": "[0.5.0, )",
-        "resolved": "0.5.0",
-        "contentHash": "p0ZdbdGRAmRAhSm1HWZ4luy/RjLZlhGPmg9OWmVFYhrq526AtxmL5Pik7uZWf3Hr3PQRR8iTH+Kyf3eHyLAGCQ=="
+        "requested": "[0.8.0, )",
+        "resolved": "0.8.0",
+        "contentHash": "LvZGHzbfdRkjzVGAcJYdU3+cvld5EHqRkNRreNSolDpRcPPUmbCr6jLfwgku+Y8ugVKUz7hx4lOLzqj9ASc+qg=="
       },
       "Microsoft.CodeAnalysis": {
         "type": "Direct",

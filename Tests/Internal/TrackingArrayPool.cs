@@ -5,22 +5,17 @@ using Xunit;
 
 namespace MirrorSharp.Tests.Internal;
 
-public class TrackingArrayPool<T> : ArrayPool<T> {
-    private readonly ArrayPool<T> _inner;
+public class TrackingArrayPool<T>(ArrayPool<T> inner) : ArrayPool<T> {
     private IDictionary<T[], string>? _rented;
 
-    public TrackingArrayPool(ArrayPool<T> inner) {
-        _inner = inner;
-    }
-
     public override T[] Rent(int minimumLength) {
-        var array = _inner.Rent(minimumLength);
+        var array = inner.Rent(minimumLength);
         _rented?.Add(array, Environment.StackTrace);
         return array;
     }
 
     public override void Return(T[] array, bool clearArray = false) {
-        _inner.Return(array);
+        inner.Return(array);
         _rented?.Remove(array);
     }
 

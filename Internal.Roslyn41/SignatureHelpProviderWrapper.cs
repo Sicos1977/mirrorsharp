@@ -8,13 +8,7 @@ using SignatureHelpTriggerReason = Microsoft.CodeAnalysis.SignatureHelp.Signatur
 
 namespace MirrorSharp.Internal.Roslyn41;
 
-internal class SignatureHelpProviderWrapper : ISignatureHelpProviderWrapper {
-    private readonly ISignatureHelpProvider _provider;
-
-    public SignatureHelpProviderWrapper(ISignatureHelpProvider provider) {
-        _provider = provider;
-    }
-
+internal class SignatureHelpProviderWrapper(ISignatureHelpProvider provider) : ISignatureHelpProviderWrapper {
     public async Task<SignatureHelpItemsData?> GetItemsAsync(Document document, int position, SignatureHelpTriggerInfoData triggerInfo, SignatureHelpOptionsData options, CancellationToken cancellationToken) {
         var mappedOptions = SignatureHelpOptions.From(options.Project);
         var mappedTriggerInfo = new SignatureHelpTriggerInfo(
@@ -22,7 +16,7 @@ internal class SignatureHelpProviderWrapper : ISignatureHelpProviderWrapper {
             triggerInfo.TriggerCharacter
         );
 
-        var items = await _provider.GetItemsAsync(
+        var items = await provider.GetItemsAsync(
             document, position,
             mappedTriggerInfo,
             mappedOptions, cancellationToken
@@ -54,10 +48,10 @@ internal class SignatureHelpProviderWrapper : ISignatureHelpProviderWrapper {
     }
 
     public bool IsRetriggerCharacter(char ch) {
-        return _provider.IsRetriggerCharacter(ch);
+        return provider.IsRetriggerCharacter(ch);
     }
 
     public bool IsTriggerCharacter(char ch) {
-        return _provider.IsTriggerCharacter(ch);
+        return provider.IsTriggerCharacter(ch);
     }
 }

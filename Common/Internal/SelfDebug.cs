@@ -26,19 +26,11 @@ internal class SelfDebug {
         for (var i = 0; i <= _logIndex; i++) yield return _log[i];
     }
 
-    public readonly struct LogEntry {
-        public DateTimeOffset DateTime { get; }
-        public string EventType { get; }
-        public string? Message { get; }
-        public int CursorPosition { get; }
-        public string Text { get; }
-
-        public LogEntry(DateTimeOffset dateTime, string eventType, string? message, int cursorPosition, string text) {
-            DateTime = dateTime;
-            EventType = eventType;
-            Message = message;
-            CursorPosition = cursorPosition;
-            Text = text;
-        }
+    public readonly struct LogEntry(DateTimeOffset dateTime, string eventType, string? message, int cursorPosition, string text) {
+        public DateTimeOffset DateTime { get; } = dateTime;
+        public string EventType { get; } = eventType;
+        public string? Message { get; } = message;
+        public int CursorPosition { get; } = cursorPosition;
+        public string Text { get; } = text;
     }
 }

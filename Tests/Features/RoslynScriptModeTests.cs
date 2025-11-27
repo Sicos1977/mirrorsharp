@@ -53,18 +53,12 @@ public class RoslynScriptModeTests {
         Assert.Equal("", result.JoinErrors());
     }
 
-    private class ScriptModeExtension : ISetOptionsFromClientExtension {
-        private readonly Type _hostObjectType;
-
-        public ScriptModeExtension(Type hostObjectType) {
-            _hostObjectType = hostObjectType;
-        }
-
+    private class ScriptModeExtension(Type hostObjectType) : ISetOptionsFromClientExtension {
         public bool TrySetOption(IWorkSession session, string name, string value) {
             if (name != "x-mode" || value != "script")
                 return false;
 
-            session.Roslyn.SetScriptMode(hostObjectType: _hostObjectType);
+            session.Roslyn.SetScriptMode(hostObjectType: hostObjectType);
             return true;
         }
     }

@@ -21,20 +21,15 @@
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.3.1" PrivateAssets="All" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="4.3.1" PrivateAssets="All" />
     <!-- Avoids vulnerability in version referenced by Microsoft.CodeAnalysis.Features -->
-    <PackageReference Include="System.Text.Json" Version="9.0.0" />
+    <PackageReference Include="System.Text.Json" Version="10.0.0" />
   </ItemGroup>
 
   <Target Name="CopySdkReferenceAssemblies" AfterTargets="ResolveReferences">
     <ItemGroup>
-      <Content Include="@(Reference->'%(RootDir)%(Directory)%(Filename)%(Extension)')"
-               Link="@(Reference->'ref-assemblies\%(Filename)%(Extension)')"
-               Condition="$([System.String]::new('%(Filename)').StartsWith('System')) or '%(Filename)' == 'netstandard'">
+      <Content Include="@(Reference->'%(RootDir)%(Directory)%(Filename)%(Extension)')" Link="@(Reference->'ref-assemblies\%(Filename)%(Extension)')" Condition="$([System.String]::new('%(Filename)').StartsWith('System')) or '%(Filename)' == 'netstandard'">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
-      <Content Include="@(Reference->'%(RootDir)%(Directory)%(Filename).xml')"
-               Link="@(Reference->'ref-assemblies\%(Filename).xml')"
-               Condition="($([System.String]::new('%(Filename)').StartsWith('System')) or '%(Filename)' == 'netstandard')
-                          and Exists('%(RootDir)%(Directory)%(Filename).xml')">
+      <Content Include="@(Reference->'%(RootDir)%(Directory)%(Filename).xml')" Link="@(Reference->'ref-assemblies\%(Filename).xml')" Condition="($([System.String]::new('%(Filename)').StartsWith('System')) or '%(Filename)' == 'netstandard')&#xD;&#xA;                          and Exists('%(RootDir)%(Directory)%(Filename).xml')">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
     </ItemGroup>

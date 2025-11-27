@@ -1,17 +1,11 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Microsoft.CodeAnalysis;
 
 namespace MirrorSharp.Internal;
 
-internal class PreloadedAnalyzerAssemblyLoader : IAnalyzerAssemblyLoader {
-    private readonly Assembly _assembly;
-
-    public PreloadedAnalyzerAssemblyLoader(Assembly assembly) {
-        _assembly = assembly;
-    }
-
+internal class PreloadedAnalyzerAssemblyLoader(Assembly assembly) : IAnalyzerAssemblyLoader {
     public Assembly LoadFromPath(string fullPath) {
-        return _assembly;
+        return assembly;
     }
 
     public void AddDependencyLocation(string fullPath) {

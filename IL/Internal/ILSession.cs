@@ -13,14 +13,9 @@ using Mobius.ILasm.Core;
 namespace MirrorSharp.IL.Internal;
 
 // ReSharper disable once InconsistentNaming
-internal class ILSession : ILanguageSessionInternal, IILSession, IILSessionInternal {
-    private readonly StringBuilder _textBuilder;
-    private string? _text;
-
-    public ILSession(string text) {
-        _textBuilder = new StringBuilder(text);
-        _text = text;
-    }
+internal class ILSession(string text) : ILanguageSessionInternal, IILSession, IILSessionInternal {
+    private readonly StringBuilder _textBuilder = new(text);
+    private string? _text = text;
 
     public Driver.Target Target { get; set; }
 

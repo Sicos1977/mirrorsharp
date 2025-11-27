@@ -41,21 +41,13 @@ public abstract class FSharpVirtualFile : IDisposable {
     }
 }
 
-internal class FSharpVirtualFile<TGetStreamContext> : FSharpVirtualFile, IDisposable {
-    private readonly Func<TGetStreamContext, IO.MemoryStream> _getStream;
-    private readonly TGetStreamContext _getStreamContext;
-
-    public FSharpVirtualFile(
-        string path,
-        Func<TGetStreamContext, IO.MemoryStream> getStream,
-        TGetStreamContext getStreamContext,
-        ConcurrentDictionary<string, FSharpVirtualFile> ownerCollection
-    ) : base(path, ownerCollection) {
-        _getStream = getStream;
-        _getStreamContext = getStreamContext;
-    }
-
+internal class FSharpVirtualFile<TGetStreamContext>(
+    string path,
+    Func<TGetStreamContext, IO.MemoryStream> getStream,
+    TGetStreamContext getStreamContext,
+    ConcurrentDictionary<string, FSharpVirtualFile> ownerCollection)
+    : FSharpVirtualFile(path, ownerCollection), IDisposable {
     internal override IO.MemoryStream GetStream() {
-        return _getStream(_getStreamContext);
+        return getStream(getStreamContext);
     }
 }

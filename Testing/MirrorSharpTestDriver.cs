@@ -138,8 +138,5 @@ public class MirrorSharpTestDriver {
         return LanguageManagerCache.GetOrAdd(options, _ => new LanguageManager(options));
     }
 
-    private class TestMiddleware : MiddlewareBase {
-        public TestMiddleware(MirrorSharpOptions options, MirrorSharpServices services) : base(GetLanguageManager(options), options, services.ToImmutable()) {
-        }
-    }
+    private class TestMiddleware(MirrorSharpOptions options, MirrorSharpServices services) : MiddlewareBase(GetLanguageManager(options), options, services.ToImmutable());
 }

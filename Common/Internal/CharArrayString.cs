@@ -1,11 +1,7 @@
-﻿using System.Collections.Immutable;
+using System.Collections.Immutable;
 
 namespace MirrorSharp.Internal;
 
-internal struct CharArrayString {
-    public CharArrayString(ImmutableArray<char> chars) {
-        Chars = chars;
-    }
-
-    public ImmutableArray<char> Chars { get; }
+internal struct CharArrayString(ImmutableArray<char> chars) {
+    public ImmutableArray<char> Chars { get; } = chars;
 }

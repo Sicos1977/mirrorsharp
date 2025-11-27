@@ -9,18 +9,12 @@ using MirrorSharp.Internal.Results;
 
 namespace MirrorSharp.Testing.Internal;
 
-internal class StubCommandResultSender : ICommandResultSender {
-    private readonly IConnectionSendViewer? _sendViewer;
-    private readonly WorkSession _session;
+internal class StubCommandResultSender(WorkSession session, IConnectionSendViewer? sendViewer = null)
+    : ICommandResultSender {
     private readonly FastUtf8JsonWriter _writer = new(ArrayPool<byte>.Shared);
 
     public string? LastMessageTypeName { get; private set; }
     public string? LastMessageJson { get; private set; }
-
-    public StubCommandResultSender(WorkSession session, IConnectionSendViewer? sendViewer = null) {
-        _session = session;
-        _sendViewer = sendViewer;
-    }
 
     public IFastJsonWriter StartJsonMessage(string messageTypeName) {
         LastMessageTypeName = messageTypeName;
@@ -31,8 +25,8 @@ internal class StubCommandResultSender : ICommandResultSender {
 
     public async Task SendJsonMessageAsync(CancellationToken cancellationToken) {
         _writer.WriteEndObject();
-        if (_sendViewer != null)
-            await _sendViewer.ViewDuringSendAsync(LastMessageTypeName!, _writer.WrittenSegment, _session, cancellationToken);
+        if (sendViewer != null)
+            await sendViewer.ViewDuringSendAsync(LastMessageTypeName!, _writer.WrittenSegment, session, cancellationToken);
         LastMessageJson = Encoding.UTF8.GetString(_writer.WrittenSegment.Array, _writer.WrittenSegment.Offset, _writer.WrittenSegment.Count);
     }
 }

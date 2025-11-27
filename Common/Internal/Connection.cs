@@ -12,42 +12,24 @@ using MirrorSharp.Internal.Results;
 
 namespace MirrorSharp.Internal;
 
-internal class Connection : ICommandResultSender, IDisposable {
-    private readonly ArrayPool<byte> _bufferPool;
-    private readonly IExceptionLogger? _exceptionLogger;
-    private readonly ImmutableArray<ICommandHandler> _handlers;
-    private readonly byte[] _inputBuffer;
+internal class Connection(
+    WebSocket socket,
+    WorkSession session,
+    ImmutableArray<ICommandHandler> handlers,
+    ArrayPool<byte> bufferPool,
+    IConnectionSendViewer? sendViewer,
+    IExceptionLogger? exceptionLogger,
+    IConnectionOptions? options)
+    : ICommandResultSender, IDisposable {
+    private readonly ImmutableArray<ICommandHandler> _handlers = handlers;
+    private readonly byte[] _inputBuffer = bufferPool.Rent(InputBufferSize);
 
-    private readonly FastUtf8JsonWriter _messageWriter;
-    private readonly IConnectionOptions? _options;
-    private readonly IConnectionSendViewer? _sendViewer;
-    private readonly WorkSession _session;
-    private readonly WebSocket _socket;
+    private readonly FastUtf8JsonWriter _messageWriter = new(bufferPool);
 
     private string? _currentMessageTypeName;
     public static int InputBufferSize => 4096;
 
-    public bool IsConnected => _socket.State == WebSocketState.Open;
-
-    public Connection(
-        WebSocket socket,
-        WorkSession session,
-        ImmutableArray<ICommandHandler> handlers,
-        ArrayPool<byte> bufferPool,
-        IConnectionSendViewer? sendViewer,
-        IExceptionLogger? exceptionLogger,
-        IConnectionOptions? options
-    ) {
-        _socket = socket;
-        _session = session;
-        _handlers = handlers;
-        _messageWriter = new FastUtf8JsonWriter(bufferPool);
-        _options = options;
-        _sendViewer = sendViewer;
-        _exceptionLogger = exceptionLogger;
-        _bufferPool = bufferPool;
-        _inputBuffer = bufferPool.Rent(InputBufferSize);
-    }
+    public bool IsConnected => socket.State == WebSocketState.Open;
 
     IFastJsonWriter ICommandResultSender.StartJsonMessage(string messageTypeName) {
         return StartJsonMessage(messageTypeName);
@@ -58,9 +40,9 @@ internal class Connection : ICommandResultSender, IDisposable {
     }
 
     public void Dispose() {
-        _bufferPool.Return(_inputBuffer);
+        bufferPool.Return(_inputBuffer);
         _messageWriter.Dispose();
-        _session.Dispose();
+        session.Dispose();
     }
 
     public async Task ReceiveAndProcessAsync(CancellationToken cancellationToken) {
@@ -71,13 +53,13 @@ internal class Connection : ICommandResultSender, IDisposable {
             var exception = ex;
             try {
                 try {
-                    _exceptionLogger?.LogException(exception, _session);
+                    exceptionLogger?.LogException(exception, session);
                 }
                 catch (Exception logException) {
                     exception = new AggregateException(exception, logException);
                 }
 
-                var error = _options?.IncludeExceptionDetails ?? false ? exception.ToString() : "A server error has occurred.";
+                var error = options?.IncludeExceptionDetails ?? false ? exception.ToString() : "A server error has occurred.";
                 await SendErrorAsync(error, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception sendException) {
@@ -90,9 +72,9 @@ internal class Connection : ICommandResultSender, IDisposable {
 
     // ReSharper disable once HeapView.ClosureAllocation
     private async Task ReceiveAndProcessInternalAsync(CancellationToken cancellationToken) {
-        var first = await _socket.ReceiveAsync(new ArraySegment<byte>(_inputBuffer), cancellationToken).ConfigureAwait(false);
+        var first = await socket.ReceiveAsync(new ArraySegment<byte>(_inputBuffer), cancellationToken).ConfigureAwait(false);
         if (first.MessageType == WebSocketMessageType.Close) {
-            await _socket.CloseAsync(first.CloseStatus ?? WebSocketCloseStatus.Empty, first.CloseStatusDescription, cancellationToken).ConfigureAwait(false);
+            await socket.CloseAsync(first.CloseStatus ?? WebSocketCloseStatus.Empty, first.CloseStatusDescription, cancellationToken).ConfigureAwait(false);
             return;
         }
 
@@ -103,8 +85,8 @@ internal class Connection : ICommandResultSender, IDisposable {
 
         // it is important to record this conditionally on SelfDebug being enabled, otherwise
         // we lose no-allocation performance by allocating here
-        var messageForDebug = _session.SelfDebug != null ? Encoding.UTF8.GetString(_inputBuffer, 0, first.Count) : null;
-        _session.SelfDebug?.Log("before", messageForDebug, _session.CursorPosition, _session.GetText());
+        var messageForDebug = session.SelfDebug != null ? Encoding.UTF8.GetString(_inputBuffer, 0, first.Count) : null;
+        session.SelfDebug?.Log("before", messageForDebug, session.CursorPosition, session.GetText());
 
         var commandId = _inputBuffer[0];
         var handler = ResolveHandler(commandId);
@@ -117,11 +99,11 @@ internal class Connection : ICommandResultSender, IDisposable {
                 async () => {
                     if (last.EndOfMessage)
                         return null;
-                    last = await _socket.ReceiveAsync(new ArraySegment<byte>(_inputBuffer), cancellationToken).ConfigureAwait(false);
+                    last = await socket.ReceiveAsync(new ArraySegment<byte>(_inputBuffer), cancellationToken).ConfigureAwait(false);
                     return _inputBuffer.AsMemory(0, last.Count);
                 }
             ),
-            _session, this, cancellationToken
+            session, this, cancellationToken
         ).ConfigureAwait(false);
 
         if (!last.EndOfMessage) {
@@ -130,11 +112,11 @@ internal class Connection : ICommandResultSender, IDisposable {
             throw new InvalidOperationException($"Received message has unread data after command '{(char)commandId}'.");
         }
 
-        _session.SelfDebug?.Log("after", messageForDebug, _session.CursorPosition, _session.GetText());
+        session.SelfDebug?.Log("after", messageForDebug, session.CursorPosition, session.GetText());
     }
 
     private async Task ReceiveToEndAsync(CancellationToken cancellationToken) {
-        while (!(await _socket.ReceiveAsync(new ArraySegment<byte>(_inputBuffer), cancellationToken).ConfigureAwait(false)).EndOfMessage) {
+        while (!(await socket.ReceiveAsync(new ArraySegment<byte>(_inputBuffer), cancellationToken).ConfigureAwait(false)).EndOfMessage) {
         }
     }
 
@@ -168,8 +150,8 @@ internal class Connection : ICommandResultSender, IDisposable {
     private Task SendJsonMessageAsync(CancellationToken cancellationToken) {
         _messageWriter.WriteEndObject();
 
-        var viewTask = _sendViewer?.ViewDuringSendAsync(_currentMessageTypeName!, _messageWriter.WrittenSegment, _session, cancellationToken);
-        var sendTask = _socket.SendAsync(
+        var viewTask = sendViewer?.ViewDuringSendAsync(_currentMessageTypeName!, _messageWriter.WrittenSegment, session, cancellationToken);
+        var sendTask = socket.SendAsync(
             _messageWriter.WrittenSegment,
             WebSocketMessageType.Text, true, cancellationToken
         );

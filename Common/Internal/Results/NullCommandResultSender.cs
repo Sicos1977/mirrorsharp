@@ -6,12 +6,8 @@ using MirrorSharp.Advanced;
 
 namespace MirrorSharp.Internal.Results;
 
-internal class NullCommandResultSender : ICommandResultSender, IDisposable {
-    private readonly FastUtf8JsonWriter _jsonWriter;
-
-    public NullCommandResultSender(ArrayPool<byte> bufferPool) {
-        _jsonWriter = new FastUtf8JsonWriter(bufferPool);
-    }
+internal class NullCommandResultSender(ArrayPool<byte> bufferPool) : ICommandResultSender, IDisposable {
+    private readonly FastUtf8JsonWriter _jsonWriter = new(bufferPool);
 
     public Task SendJsonMessageAsync(CancellationToken cancellationToken) {
         return cancellationToken.IsCancellationRequested ? Task.FromCanceled(cancellationToken) : Task.CompletedTask;

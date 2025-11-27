@@ -3,17 +3,11 @@ using MirrorSharp.Internal.Abstraction;
 
 namespace MirrorSharp.Php.Internal;
 
-internal class PhpLanguage : ILanguage {
+internal class PhpLanguage(MirrorSharpPhpOptions options) : ILanguage {
     public const string Name = "PHP";
 
-    private readonly MirrorSharpPhpOptions _options;
-
-    public PhpLanguage(MirrorSharpPhpOptions options) {
-        _options = options;
-    }
-
     public ILanguageSessionInternal CreateSession(string text, ILanguageSessionExtensions extensions) {
-        return new PhpSession(text, _options);
+        return new PhpSession(text, options);
     }
 
     string ILanguage.Name => Name;

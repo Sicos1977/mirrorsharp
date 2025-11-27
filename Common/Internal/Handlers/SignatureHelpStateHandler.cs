@@ -6,13 +6,7 @@ using MirrorSharp.Internal.Results;
 
 namespace MirrorSharp.Internal.Handlers;
 
-internal class SignatureHelpStateHandler : ICommandHandler {
-    private readonly ISignatureHelpSupport _signatureHelp;
-
-    public SignatureHelpStateHandler(ISignatureHelpSupport signatureHelp) {
-        _signatureHelp = signatureHelp;
-    }
-
+internal class SignatureHelpStateHandler(ISignatureHelpSupport signatureHelp) : ICommandHandler {
     public char CommandId => CommandIds.SignatureHelpState;
 
     public Task ExecuteAsync(AsyncData data, WorkSession session, ICommandResultSender sender, CancellationToken cancellationToken) {
@@ -21,6 +15,6 @@ internal class SignatureHelpStateHandler : ICommandHandler {
             // ReSharper disable once HeapView.BoxingAllocation
             throw new FormatException($"Unknown SignatureHelp command '{@char}'.");
 
-        return _signatureHelp.ForceSignatureHelpAsync(session, sender, cancellationToken);
+        return signatureHelp.ForceSignatureHelpAsync(session, sender, cancellationToken);
     }
 }

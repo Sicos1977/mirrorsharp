@@ -10,15 +10,10 @@ using MirrorSharp.Internal.Roslyn.Internals;
 namespace MirrorSharp.Internal.Roslyn49;
 
 [Export(typeof(ISignatureHelpProviderWrapperResolver))]
-internal class SignatureHelpProviderWrapperResolver : ISignatureHelpProviderWrapperResolver {
-    private readonly IList<Lazy<ISignatureHelpProvider, OrderableLanguageMetadata>> _allProviders;
-
-    [ImportingConstructor]
-    public SignatureHelpProviderWrapperResolver(
-        [ImportMany] IEnumerable<Lazy<ISignatureHelpProvider, OrderableLanguageMetadata>> allProviders
-    ) {
-        _allProviders = ExtensionOrderer.Order(allProviders);
-    }
+[method: ImportingConstructor]
+internal class SignatureHelpProviderWrapperResolver([ImportMany] IEnumerable<Lazy<ISignatureHelpProvider, OrderableLanguageMetadata>> allProviders)
+    : ISignatureHelpProviderWrapperResolver {
+    private readonly IList<Lazy<ISignatureHelpProvider, OrderableLanguageMetadata>> _allProviders = ExtensionOrderer.Order(allProviders);
 
     public IEnumerable<ISignatureHelpProviderWrapper> GetAllSlow(string languageName) {
         if (languageName == null)

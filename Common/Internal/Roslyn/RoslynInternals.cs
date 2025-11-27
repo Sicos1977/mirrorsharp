@@ -12,24 +12,17 @@ using System.Runtime.Loader;
 
 namespace MirrorSharp.Internal.Roslyn;
 
-internal class RoslynInternals {
+internal class RoslynInternals(
+    ICodeActionInternals codeAction,
+    IWorkspaceAnalyzerOptionsInternals workspaceAnalyzerOptions,
+    ISignatureHelpProviderWrapperResolver signatureHelpProviderResolver) {
     private static readonly Lazy<Assembly> _internalAssembly = new(
         LoadInternalsAssemblyWithDependenciesSlowUncached, LazyThreadSafetyMode.PublicationOnly
     );
 
-    public ICodeActionInternals CodeAction { get; }
-    public IWorkspaceAnalyzerOptionsInternals WorkspaceAnalyzerOptions { get; }
-    public ISignatureHelpProviderWrapperResolver SignatureHelpProviderResolver { get; }
-
-    public RoslynInternals(
-        ICodeActionInternals codeAction,
-        IWorkspaceAnalyzerOptionsInternals workspaceAnalyzerOptions,
-        ISignatureHelpProviderWrapperResolver signatureHelpProviderResolver
-    ) {
-        CodeAction = codeAction;
-        WorkspaceAnalyzerOptions = workspaceAnalyzerOptions;
-        SignatureHelpProviderResolver = signatureHelpProviderResolver;
-    }
+    public ICodeActionInternals CodeAction { get; } = codeAction;
+    public IWorkspaceAnalyzerOptionsInternals WorkspaceAnalyzerOptions { get; } = workspaceAnalyzerOptions;
+    public ISignatureHelpProviderWrapperResolver SignatureHelpProviderResolver { get; } = signatureHelpProviderResolver;
 
     public static RoslynInternals Get(CompositionHost compositionHost) {
         Argument.NotNull(nameof(compositionHost), compositionHost);
@@ -99,8 +92,8 @@ internal class RoslynInternals {
 
     private static Assembly LoadInternalsAssemblySlow(Version roslynVersion) {
         var assemblyName = roslynVersion switch {
-            { Major: > 5 } or { Major: 5, Minor: >= 0 } => "MirrorSharp.Internal.Roslyn50.dll",
-            { Major: > 4 } or { Major: 4, Minor: >= 14 } => "MirrorSharp.Internal.Roslyn414.dll",
+            { Major: > 5 } => "MirrorSharp.Internal.Roslyn50.dll",
+            { Major: 4, Minor: 14 } => "MirrorSharp.Internal.Roslyn414.dll",
             { Major: 4, Minor: 13 } => "MirrorSharp.Internal.Roslyn413.dll",
             { Major: 4, Minor: 12 } => "MirrorSharp.Internal.Roslyn412.dll",
             { Major: 4, Minor: 11 } => "MirrorSharp.Internal.Roslyn411.dll",

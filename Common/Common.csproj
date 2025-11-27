@@ -16,7 +16,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.3.1" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="3.3.1" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="3.3.1" />
-    <PackageReference Include="System.Memory" Version="4.5.5" />
+    <PackageReference Include="System.Memory" Version="4.6.3" />
     <!-- Avoids vulnerability in version referenced by other dependencies -->
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
     <!-- Avoids vulnerability in version referenced by other dependencies -->
@@ -43,10 +43,7 @@
     <_RoslynInternalsProject Include="../Internal.Roslyn*/*.csproj" Exclude="../Internal.RoslynInternals/*.csproj" />
     <ProjectReference Include="@(_RoslynInternalsProject)" ReferenceOutputAssembly="false" />
 
-    <EmbeddedResource
-      Include="@(_RoslynInternalsProject->'%(RelativeDir)\bin\$(Configuration)\netstandard2.0\MirrorSharp.%(Filename).dll')"
-      Link="Internal\Roslyn\Internals\Assemblies\%(Filename)%(Extension)"
-      LogicalName="%(Filename)%(Extension)" />
+    <EmbeddedResource Include="@(_RoslynInternalsProject->'%(RelativeDir)\bin\$(Configuration)\netstandard2.0\MirrorSharp.%(Filename).dll')" Link="Internal\Roslyn\Internals\Assemblies\%(Filename)%(Extension)" LogicalName="%(Filename)%(Extension)" />
 
     <InternalsVisibleTo Include="@(_RoslynInternalsProject->'MirrorSharp.%(Filename)')" />
   </ItemGroup>

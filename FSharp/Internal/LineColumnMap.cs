@@ -50,16 +50,10 @@ internal class LineColumnMap {
         return new LineColumnMap(map);
     }
 
-    public struct Line {
-        public Line(int number, int start, int end) {
-            Number = number;
-            Start = start;
-            End = end;
-        }
-
-        public int Number { get; }
-        public int Start { get; }
-        public int End { get; }
+    public struct Line(int number, int start, int end) {
+        public int Number { get; } = number;
+        public int Start { get; } = start;
+        public int End { get; } = end;
         public int Length => End - Start;
     }
 }

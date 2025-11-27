@@ -3,24 +3,15 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace MirrorSharp.Internal.Roslyn.Internals;
 
-internal class SignatureHelpItemsData {
-    public IEnumerable<SignatureHelpItemData> Items { get; }
-    public TextSpan ApplicableSpan { get; }
-    public int ArgumentIndex { get; }
-    public int ArgumentCount { get; }
-    public int? SelectedItemIndex { get; }
-
-    public SignatureHelpItemsData(
-        IEnumerable<SignatureHelpItemData> items,
-        TextSpan applicableSpan,
-        int argumentIndex,
-        int argumentCount,
-        int? selectedItemIndex
-    ) {
-        Items = items;
-        ApplicableSpan = applicableSpan;
-        ArgumentIndex = argumentIndex;
-        ArgumentCount = argumentCount;
-        SelectedItemIndex = selectedItemIndex;
-    }
+internal class SignatureHelpItemsData(
+    IEnumerable<SignatureHelpItemData> items,
+    TextSpan applicableSpan,
+    int argumentIndex,
+    int argumentCount,
+    int? selectedItemIndex) {
+    public IEnumerable<SignatureHelpItemData> Items { get; } = items;
+    public TextSpan ApplicableSpan { get; } = applicableSpan;
+    public int ArgumentIndex { get; } = argumentIndex;
+    public int ArgumentCount { get; } = argumentCount;
+    public int? SelectedItemIndex { get; } = selectedItemIndex;
 }

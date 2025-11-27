@@ -3,15 +3,10 @@ using Microsoft.CodeAnalysis;
 
 namespace MirrorSharp.Internal.Roslyn;
 
-internal class CSharpLanguage : RoslynLanguageBase {
-    public CSharpLanguage(MirrorSharpCSharpOptions options) : base(
-        LanguageNames.CSharp,
-        "Microsoft.CodeAnalysis.CSharp.Features",
-        "Microsoft.CodeAnalysis.CSharp.Workspaces",
-        options
-    ) {
-    }
-
+internal class CSharpLanguage(MirrorSharpCSharpOptions options) : RoslynLanguageBase(LanguageNames.CSharp,
+    "Microsoft.CodeAnalysis.CSharp.Features",
+    "Microsoft.CodeAnalysis.CSharp.Workspaces",
+    options) {
     protected override bool ShouldConsiderForHostServices(Type type) {
         return base.ShouldConsiderForHostServices(type)
                // IntelliCode type, not available in normal environments

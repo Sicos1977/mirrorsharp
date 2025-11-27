@@ -12,13 +12,7 @@ using MirrorSharp.Internal.Results;
 
 namespace MirrorSharp.Internal.Handlers;
 
-internal class SlowUpdateHandler : ICommandHandler {
-    private readonly ISlowUpdateExtension? _extension;
-
-    public SlowUpdateHandler(ISlowUpdateExtension? extension) {
-        _extension = extension;
-    }
-
+internal class SlowUpdateHandler(ISlowUpdateExtension? extension) : ICommandHandler {
     public char CommandId => CommandIds.SlowUpdate;
 
     public async Task ExecuteAsync(AsyncData data, WorkSession session, ICommandResultSender sender, CancellationToken cancellationToken) {
@@ -27,9 +21,9 @@ internal class SlowUpdateHandler : ICommandHandler {
         var diagnostics = (IReadOnlyList<Diagnostic>)await session.LanguageSession.GetDiagnosticsAsync(cancellationToken).ConfigureAwait(false);
         object? extensionResult = null;
         try {
-            if (_extension != null) {
+            if (extension != null) {
                 var mutableDiagnostics = diagnostics.ToList();
-                extensionResult = await _extension.ProcessAsync(session, mutableDiagnostics, cancellationToken).ConfigureAwait(false);
+                extensionResult = await extension.ProcessAsync(session, mutableDiagnostics, cancellationToken).ConfigureAwait(false);
                 diagnostics = mutableDiagnostics;
             }
 
@@ -71,9 +65,9 @@ internal class SlowUpdateHandler : ICommandHandler {
         }
 
         writer.WriteEndArray();
-        if (_extension != null) {
+        if (extension != null) {
             writer.WritePropertyName("x");
-            _extension.WriteResult(writer, extensionResult, session);
+            extension.WriteResult(writer, extensionResult, session);
         }
 
         await sender.SendJsonMessageAsync(cancellationToken).ConfigureAwait(false);

@@ -5,18 +5,12 @@ using MirrorSharp.Internal.Results;
 
 namespace MirrorSharp.Internal.Handlers;
 
-internal class MoveCursorHandler : ICommandHandler {
-    private readonly ISignatureHelpSupport _signatureHelp;
-
-    public MoveCursorHandler(ISignatureHelpSupport signatureHelp) {
-        _signatureHelp = signatureHelp;
-    }
-
+internal class MoveCursorHandler(ISignatureHelpSupport signatureHelp) : ICommandHandler {
     public char CommandId => CommandIds.MoveCursor;
 
     public Task ExecuteAsync(AsyncData data, WorkSession session, ICommandResultSender sender, CancellationToken cancellationToken) {
         var cursorPosition = FastConvert.Utf8BytesToInt32(data.GetFirst().Span);
         session.CursorPosition = cursorPosition;
-        return _signatureHelp.ApplyCursorPositionChangeAsync(session, sender, cancellationToken);
+        return signatureHelp.ApplyCursorPositionChangeAsync(session, sender, cancellationToken);
     }
 }

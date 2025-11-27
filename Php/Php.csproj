@@ -27,7 +27,7 @@
       Avoids vulnerability in version referenced by other dependencies
       TOOD: Try removing after upgrading Peachpie.CodeAnalysis/Peachpie.App.
     -->
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
 
   <Target Name="ChangeAliasesOfStrongNameAssemblies" BeforeTargets="FindReferenceAssembliesForReferences;ResolveReferences">

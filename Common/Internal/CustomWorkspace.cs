@@ -3,11 +3,10 @@ using Microsoft.CodeAnalysis.Host;
 
 namespace MirrorSharp.Internal;
 
-internal class CustomWorkspace : Workspace {
+internal class CustomWorkspace(HostServices host) : Workspace(host, "Custom") {
     public override bool CanOpenDocuments => true;
 
-    public CustomWorkspace(HostServices host) : base(host, "Custom" /* same as AdHoc */) {
-    }
+    /* same as AdHoc */
 
     public override bool CanApplyChange(ApplyChangesKind feature) {
         return feature == ApplyChangesKind.ChangeDocument

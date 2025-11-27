@@ -5,24 +5,15 @@ using Microsoft.CodeAnalysis;
 
 namespace MirrorSharp.Internal.Roslyn.Internals;
 
-internal class SignatureHelpParameterData {
-    public string Name { get; }
-    public Func<CancellationToken, IEnumerable<TaggedText>> DocumentationFactory { get; }
-    public IList<TaggedText> DisplayParts { get; }
-    public IList<TaggedText> PrefixDisplayParts { get; }
-    public IList<TaggedText> SuffixDisplayParts { get; }
-
-    public SignatureHelpParameterData(
-        string name,
-        Func<CancellationToken, IEnumerable<TaggedText>> documentationFactory,
-        IList<TaggedText> displayParts,
-        IList<TaggedText> prefixDisplayParts,
-        IList<TaggedText> suffixDisplayParts
-    ) {
-        Name = name;
-        DocumentationFactory = documentationFactory;
-        DisplayParts = displayParts;
-        PrefixDisplayParts = prefixDisplayParts;
-        SuffixDisplayParts = suffixDisplayParts;
-    }
+internal class SignatureHelpParameterData(
+    string name,
+    Func<CancellationToken, IEnumerable<TaggedText>> documentationFactory,
+    IList<TaggedText> displayParts,
+    IList<TaggedText> prefixDisplayParts,
+    IList<TaggedText> suffixDisplayParts) {
+    public string Name { get; } = name;
+    public Func<CancellationToken, IEnumerable<TaggedText>> DocumentationFactory { get; } = documentationFactory;
+    public IList<TaggedText> DisplayParts { get; } = displayParts;
+    public IList<TaggedText> PrefixDisplayParts { get; } = prefixDisplayParts;
+    public IList<TaggedText> SuffixDisplayParts { get; } = suffixDisplayParts;
 }

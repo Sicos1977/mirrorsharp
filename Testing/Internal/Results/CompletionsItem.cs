@@ -6,12 +6,8 @@ using System.Collections.Generic;
 
 namespace MirrorSharp.Testing.Internal.Results;
 
-internal class CompletionsItem {
-    public string DisplayText { get; }
+internal class CompletionsItem(string displayText) {
+    public string DisplayText { get; } = displayText;
     public int? Priority { get; set; }
     public IList<string> Kinds { get; } = new List<string>();
-
-    public CompletionsItem(string displayText) {
-        DisplayText = displayText;
-    }
 }

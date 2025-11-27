@@ -6,12 +6,12 @@ using MirrorSharp.Internal.Roslyn;
 
 namespace MirrorSharp.Internal;
 
-internal class WorkSession : IWorkSession, IDisposable {
-    private readonly ILanguageSessionExtensions _extensions;
+internal class WorkSession(ILanguage language, IWorkSessionOptions options, ILanguageSessionExtensions extensions)
+    : IWorkSession, IDisposable {
     private ILanguageSessionInternal? _languageSession;
     private string _lastText = "";
 
-    public ILanguage Language { get; private set; }
+    public ILanguage Language { get; private set; } = Argument.NotNull(nameof(language), language);
 
     public ILanguageSessionInternal LanguageSession {
         get {
@@ -27,14 +27,7 @@ internal class WorkSession : IWorkSession, IDisposable {
     public CurrentCompletion CurrentCompletion { get; } = new();
 
     public IDictionary<string, string> RawOptionsFromClient { get; } = new Dictionary<string, string>();
-    public SelfDebug? SelfDebug { get; }
-
-    public WorkSession(ILanguage language, IWorkSessionOptions options, ILanguageSessionExtensions extensions) {
-        Language = Argument.NotNull(nameof(language), language);
-        _extensions = extensions;
-
-        SelfDebug = options.SelfDebugEnabled ? new SelfDebug() : null;
-    }
+    public SelfDebug? SelfDebug { get; } = options.SelfDebugEnabled ? new SelfDebug() : null;
 
     public void Dispose() {
         _languageSession?.Dispose();
@@ -66,7 +59,7 @@ internal class WorkSession : IWorkSession, IDisposable {
     }
 
     private void Initialize() {
-        _languageSession = Language.CreateSession(_lastText, _extensions);
+        _languageSession = Language.CreateSession(_lastText, extensions);
     }
 
     public void ReplaceText(string newText, int start = 0, int? length = null) {

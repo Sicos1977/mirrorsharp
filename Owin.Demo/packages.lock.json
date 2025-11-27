@@ -4,31 +4,31 @@
     ".NETFramework,Version=v4.8": {
       "Microsoft.Owin": {
         "type": "Direct",
-        "requested": "[4.2.2, )",
-        "resolved": "4.2.2",
-        "contentHash": "jt410l/8dvCIguRdU7dupYdm4kGLepVdD8EOTKU4nYZcLRrn6kQYqI6pbJOTJp7Vlm/T2WUF5bzyKK2z29xtjg==",
+        "requested": "[4.2.3, )",
+        "resolved": "4.2.3",
+        "contentHash": "uoOKm7Ouj06+ULS7Ss60tRM2E5t0ku7rQ7cJk864jArtE35WTJKMzUxgHxs7gdiqHZYnC3ddZSr9zj8yRjguEA==",
         "dependencies": {
           "Owin": "1.0.0"
         }
       },
       "Microsoft.Owin.Host.SystemWeb": {
         "type": "Direct",
-        "requested": "[4.2.2, )",
-        "resolved": "4.2.2",
-        "contentHash": "MYdqpNXC5xX7pVAnhGDfZvU7ybylYENqnV17XYGGkInk3Hco2Fx8t4nVBXBoAw/3ox6cNTbazq+EiS4Pi9lGQA==",
+        "requested": "[4.2.3, )",
+        "resolved": "4.2.3",
+        "contentHash": "vYb7xhw93lFZrevsDtgzn9l72YaP9y908o9ngubrOqwJDv+xwLBG+qC2Fupy+jKTSucUQD0fv8fgip4pkGIJLA==",
         "dependencies": {
-          "Microsoft.Owin": "4.2.2",
+          "Microsoft.Owin": "4.2.3",
           "Owin": "1.0.0"
         }
       },
       "Microsoft.Owin.StaticFiles": {
         "type": "Direct",
-        "requested": "[4.2.2, )",
-        "resolved": "4.2.2",
-        "contentHash": "yRflUgZxWRMUap4QqDjev9q3tY9eGh6JETYKTD5UaVxbggRRfxhQ65QH/8vo6Wc9rSAlPIrLtd21EFfv83lxvQ==",
+        "requested": "[4.2.3, )",
+        "resolved": "4.2.3",
+        "contentHash": "Ku6zHkjD7dZ/9WrjOvEAQkODFIV28Xep1jjVy7ViEuEomAYcvoAHglsSGLDrYeeh5kGksxQQKQqh7hogNvu10g==",
         "dependencies": {
-          "Microsoft.Owin": "4.2.2",
-          "Microsoft.Owin.FileSystems": "4.2.2",
+          "Microsoft.Owin": "4.2.3",
+          "Microsoft.Owin.FileSystems": "4.2.3",
           "Owin": "1.0.0"
         }
       },
@@ -198,8 +198,8 @@
       },
       "Microsoft.Owin.FileSystems": {
         "type": "Transitive",
-        "resolved": "4.2.2",
-        "contentHash": "GDYA+V0xJkqdp5lRehCJ3vT8Fp1OjmKLvKibEvYTgwg41CtUXduo5xKpsfnZ2IYCszUSrGJ8OdUKtoFc7mpMcw=="
+        "resolved": "4.2.3",
+        "contentHash": "9Wf2TVUo8afE3vyVqLJ0yc4H4VbGAsuRGha9dCkKTQBRv82TJyMi59K/nmNeRfiBRcLcH6Y3m1Nyf/D1WJf8oA=="
       },
       "Owin": {
         "type": "Transitive",
@@ -208,8 +208,8 @@
       },
       "System.Buffers": {
         "type": "Transitive",
-        "resolved": "4.6.0",
-        "contentHash": "lN6tZi7Q46zFzAbRYXTIvfXcyvQQgxnY7Xm6C6xQ9784dEL1amjM6S6Iw4ZpsvesAKnRVsM4scrDQaDqSClkjA=="
+        "resolved": "4.6.1",
+        "contentHash": "N8GXpmiLMtljq7gwvyS+1QvKT/W2J8sNAvx+HVg4NGmsG/H+2k/y9QI23auLJRterrzCiDH+IWAw4V/GPwsMlw=="
       },
       "System.Collections.Immutable": {
         "type": "Transitive",
@@ -299,12 +299,12 @@
       },
       "System.Memory": {
         "type": "Transitive",
-        "resolved": "4.6.0",
-        "contentHash": "OEkbBQoklHngJ8UD8ez2AERSk2g+/qpAaSWWCBFbpH727HxDq5ydVkuncBaKcKfwRqXGWx64dS6G1SUScMsitg==",
+        "resolved": "4.6.3",
+        "contentHash": "qdcDOgnFZY40+Q9876JUHnlHu7bosOHX8XISRoH94fwk6hgaeQGSgfZd8srWRZNt5bV9ZW2TljcegDNxsf+96A==",
         "dependencies": {
-          "System.Buffers": "4.6.0",
-          "System.Numerics.Vectors": "4.6.0",
-          "System.Runtime.CompilerServices.Unsafe": "6.1.0"
+          "System.Buffers": "4.6.1",
+          "System.Numerics.Vectors": "4.6.1",
+          "System.Runtime.CompilerServices.Unsafe": "6.1.2"
         }
       },
       "System.Net.Http": {
@@ -317,8 +317,8 @@
       },
       "System.Numerics.Vectors": {
         "type": "Transitive",
-        "resolved": "4.6.0",
-        "contentHash": "t+SoieZsRuEyiw/J+qXUbolyO219tKQQI0+2/YI+Qv7YdGValA6WiuokrNKqjrTNsy5ABWU11bdKOzUdheteXg=="
+        "resolved": "4.6.1",
+        "contentHash": "sQxefTnhagrhoq2ReR0D/6K0zJcr9Hrd6kikeXsA1I8kOCboTavcUC4r7TSfpKFeE163uMuxZcyfO1mGO3EN8Q=="
       },
       "System.Reflection.Emit": {
         "type": "Transitive",
@@ -341,8 +341,8 @@
       },
       "System.Runtime.CompilerServices.Unsafe": {
         "type": "Transitive",
-        "resolved": "6.1.0",
-        "contentHash": "5o/HZxx6RVqYlhKSq8/zronDkALJZUT2Vz0hx43f0gwe8mwlM0y2nYlqdBwLMzr262Bwvpikeb/yEwkAa5PADg=="
+        "resolved": "6.1.2",
+        "contentHash": "2hBr6zdbIBTDE3EhK7NSVNdX58uTK6iHW/P/Axmm9sl1xoGSLqDvMtpecn226TNwHByFokYwJmt/aQQNlO5CRw=="
       },
       "System.Security.Cryptography.Algorithms": {
         "type": "Transitive",
@@ -432,7 +432,7 @@
           "Microsoft.CodeAnalysis.CSharp.Features": "[3.3.1, )",
           "Microsoft.CodeAnalysis.Common": "[3.3.1, )",
           "Microsoft.CodeAnalysis.Workspaces.Common": "[3.3.1, )",
-          "System.Memory": "[4.5.5, )",
+          "System.Memory": "[4.6.3, )",
           "System.Net.Http": "[4.3.4, )",
           "System.Text.RegularExpressions": "[4.3.1, )"
         }
@@ -450,7 +450,7 @@
       "MirrorSharp.Owin": {
         "type": "Project",
         "dependencies": {
-          "Microsoft.Owin": "[4.2.2, )",
+          "Microsoft.Owin": "[4.2.3, )",
           "MirrorSharp.Common": "[3.0.10, )",
           "Owin": "[1.0.0, )"
         }

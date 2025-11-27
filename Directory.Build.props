@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <LangVersion>10.0</LangVersion>
+    <LangVersion>14.0</LangVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsNotAsErrors>1591</WarningsNotAsErrors>
     <!-- Move to WarningsNotAsErrors after https://github.com/NuGet/Home/issues/5375 -->
@@ -26,15 +26,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Condition="'$(HasPublicApi)' == 'true' And '$(MSBuildProjectName)' != 'Common'"
-                      Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.0">
+    <PackageReference Condition="'$(HasPublicApi)' == 'true' And '$(MSBuildProjectName)' != 'Common'" Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
 
     <!-- Common currently crashes, see https://github.com/dotnet/roslyn-analyzers/issues/3445 -->
-    <PackageReference Condition="'$(HasPublicApi)' == 'true' And '$(MSBuildProjectName)' == 'Common'"
-                      Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="2.9.8">
+    <PackageReference Condition="'$(HasPublicApi)' == 'true' And '$(MSBuildProjectName)' == 'Common'" Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="2.9.8">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

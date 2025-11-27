@@ -4,46 +4,39 @@ using System.Threading;
 
 namespace MirrorSharp.FSharp.Internal;
 
-internal class ReusableMemoryStreamWrapper : Stream {
-    private readonly string _name;
-    private readonly MemoryStream _stream;
+internal class ReusableMemoryStreamWrapper(MemoryStream stream, string name) : Stream {
     private int _inUse = 0;
 
-    internal Stream InnerStream => _stream;
+    internal Stream InnerStream => stream;
 
-    public override bool CanRead => _stream.CanRead;
-    public override bool CanSeek => _stream.CanSeek;
-    public override bool CanWrite => _stream.CanWrite;
-    public override long Length => _stream.Length;
+    public override bool CanRead => stream.CanRead;
+    public override bool CanSeek => stream.CanSeek;
+    public override bool CanWrite => stream.CanWrite;
+    public override long Length => stream.Length;
 
     public override long Position {
-        get => _stream.Position;
-        set => _stream.Position = value;
-    }
-
-    public ReusableMemoryStreamWrapper(MemoryStream stream, string name) {
-        _stream = stream;
-        _name = name;
+        get => stream.Position;
+        set => stream.Position = value;
     }
 
     public override void Flush() {
-        _stream.Flush();
+        stream.Flush();
     }
 
     public override long Seek(long offset, SeekOrigin origin) {
-        return _stream.Seek(offset, origin);
+        return stream.Seek(offset, origin);
     }
 
     public override void SetLength(long value) {
-        _stream.SetLength(value);
+        stream.SetLength(value);
     }
 
     public override int Read(byte[] buffer, int offset, int count) {
-        return _stream.Read(buffer, offset, count);
+        return stream.Read(buffer, offset, count);
     }
 
     public override void Write(byte[] buffer, int offset, int count) {
-        _stream.Write(buffer, offset, count);
+        stream.Write(buffer, offset, count);
     }
 
     public override void Close() {
@@ -54,7 +47,7 @@ internal class ReusableMemoryStreamWrapper : Stream {
 
     internal ReusableMemoryStreamWrapper Reuse() {
         if (Interlocked.CompareExchange(ref _inUse, 1, 0) == 1)
-            throw new InvalidOperationException($"Stream {_name} is currently in use, parallel access is not supported.");
+            throw new InvalidOperationException($"Stream {name} is currently in use, parallel access is not supported.");
         return this;
     }
 }
